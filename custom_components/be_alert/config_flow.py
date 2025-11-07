@@ -112,9 +112,6 @@ class BEAlertOptionsFlow(config_entries.OptionsFlow):
             vol.Required("sensor_type"): selector.SelectSelector(
                 selector.SelectSelectorConfig(
                     mode=selector.SelectSelectorMode.LIST,
-                    # Let the frontend handle translations using the standard key.
-                    translation_key="sensor_type",
-                    # It will look for translations under `options.step.add_sensor.data.sensor_type`.
                     options=["all", LOCATION_SOURCE_ZONE, LOCATION_SOURCE_DEVICE],
                 )
             )

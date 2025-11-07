@@ -34,9 +34,11 @@
                 "data": {
                     "sensor_type": {
                         "name": "Type sensor om toe te voegen",
-                        "all": "Alle meldingen (België-breed)",
-                        "zone": "Zone-gebaseerde sensor",
-                        "device": "Apparaat- of persoonsgebaseerde sensor"
+                        "options": {
+                            "all": "Alle meldingen (België-breed)",
+                            "zone": "Zone-gebaseerde sensor",
+                            "device": "Apparaat- of persoonsgebaseerde sensor"
+                        }
                     }
                 }
             },

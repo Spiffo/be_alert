@@ -1,18 +1,18 @@
 {
     "domain": "be_alert",
     "name": "BE Alert",
-    "version": "0.1.0",
+    "codeowners": [
+        "@Spiffo"
+    ],
+    "config_flow": true,
+    "dependencies": [],
+    "documentation": "https://github.com/Spiffo/be-alert",
+    "integration_type": "hub",
+    "iot_class": "cloud_polling",
+    "issue_tracker": "https://github.com/Spiffo/be-alert/issues",
     "requirements": [
         "aiohttp",
         "shapely"
     ],
-    "dependencies": [],
-    "codeowners": [
-        "@Spiffo"
-    ],
-    "documentation": "https://github.com/Spiffo/be-alert",
-    "issue_tracker": "https://github.com/Spiffo/be-alert/issues",
-    "iot_class": "cloud_polling",
-    "config_flow": true,
-    "integration_type": "hub"
+    "version": "0.1.0"
 }

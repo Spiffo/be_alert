@@ -1,19 +1,18 @@
 """BE Alert data coordinator and fetcher with logging."""
+
 from __future__ import annotations
 
-#from datetime import timedelta
+# from datetime import timedelta
 import logging
 import aiohttp
 import shapely.geometry
 
-# from homeassistant.core import HomeAssistant
-# from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
-# from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.util import dt as ha_dt
 
 from .const import FEED_URL
 
 _LOGGER = logging.getLogger(__name__)
+
 
 class BeAlertFetcher:
     """Fetch BE Alert feed and parse polygons with logging."""
@@ -47,7 +46,10 @@ class BeAlertFetcher:
                             try:
                                 polygons.append(shapely.geometry.Polygon(points))
                             except Exception:
-                                _LOGGER.warning("BeAlertFetcher: invalid polygon points, skipping", exc_info=True)
+                                _LOGGER.warning(
+                                    "BeAlertFetcher: invalid polygon points, "
+                                    "skipping", exc_info=True
+                                )
             alerts.append(
                 {
                     "title": item.get("title"),
@@ -61,9 +63,14 @@ class BeAlertFetcher:
                 }
             )
         self.alerts = alerts
-        _LOGGER.warning("BeAlertFetcher.async_update: finished fetch, %d alerts parsed", len(self.alerts))
+        _LOGGER.warning(
+            "BeAlertFetcher.async_update: finished fetch, %d alerts parsed",
+            len(self.alerts)
+        )
 
-    def alerts_affecting_point(self, lon: float | None, lat: float | None) -> list[dict]:
+    def alerts_affecting_point(
+            self, lon: float | None, lat: float | None
+    ) -> list[dict]:
         """Return list of alerts whose polygons contain the given point."""
         if lat is None or lon is None:
             return []
@@ -76,28 +83,9 @@ class BeAlertFetcher:
                         matches.append(alert)
                         break
                 except Exception:
-                    _LOGGER.warning("BeAlertFetcher: polygon contains() failed", exc_info=True)
+                    _LOGGER.warning(
+                        "BeAlertFetcher: polygon contains() failed",
+                        exc_info=True
+                    )
         return matches
-
-
-# async def async_create_coordinator(hass: HomeAssistant, update_interval: int = 5):
-#     """Create and return a (fetcher, coordinator) pair, do an initial refresh."""
-#     _LOGGER.warning("async_create_coordinator: creating fetcher and coordinator")
-#     session = async_get_clientsession(hass)
-#     fetcher = BeAlertFetcher(session)
-
-#     coordinator = DataUpdateCoordinator(
-#         hass,
-#         _LOGGER,
-#         name=DOMAIN,
-#         update_method=fetcher.async_update,
-#         update_interval=timedelta(minutes=update_interval),
-#     )
-
-#     # Initial safe refresh; use async_refresh (allowed anytime)
-#     _LOGGER.warning("async_create_coordinator: performing initial coordinator.async_refresh()")
-#     await coordinator.async_refresh()
-#     _LOGGER.warning("async_create_coordinator: initial refresh complete; %d alerts", len(fetcher.alerts))
-
-#     return {"fetcher": fetcher, "coordinator": coordinator}
  

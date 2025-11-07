@@ -24,8 +24,10 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up BE Alert from a config entry."""
-    # This function is now the central point for setting up the integration's data handling.
-    _LOGGER.warning(f"__init__.async_setup_entry: Setting up entry {entry.entry_id} with options: {entry.options}")
+    _LOGGER.warning(
+        "__init__.async_setup_entry: Setting up entry %s with options: %s",
+        entry.entry_id, entry.options
+    )
 
     hass.data.setdefault(DOMAIN, {})
 
@@ -37,7 +39,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     fetcher = BeAlertFetcher(session)
 
     scan_interval = entry.options.get("scan_interval", DEFAULT_SCAN_INTERVAL)
-    _LOGGER.warning(f"__init__.async_setup_entry: Using scan_interval of {scan_interval} minutes.")
+    _LOGGER.warning(
+        "__init__.async_setup_entry: Using scan_interval of %s minutes.",
+        scan_interval)
     coordinator = DataUpdateCoordinator(
         hass,
         _LOGGER,
@@ -46,7 +50,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         update_interval=timedelta(minutes=scan_interval),
     )
     await coordinator.async_config_entry_first_refresh()
-    _LOGGER.warning("__init__.async_setup_entry: Coordinator initial refresh complete.")
+    _LOGGER.warning(
+        "__init__.async_setup_entry: Coordinator initial refresh complete."
+    )
 
     # Store the coordinator and fetcher scoped to this config entry
     hass.data[DOMAIN][entry.entry_id] = {"coordinator": coordinator, "fetcher": fetcher}
@@ -55,7 +61,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if not hass.services.has_service(DOMAIN, "update"):
         async def async_update_service(service_call):
             """Handle the service call to update all BE Alert coordinators."""
-            _LOGGER.info("BE Alert update service called, refreshing all coordinators.")
+            _LOGGER.info(
+                "BE Alert update service called, refreshing all coordinators."
+            )
             for entry_data in hass.data[DOMAIN].values():
                 await entry_data["coordinator"].async_request_refresh()
         hass.services.async_register(DOMAIN, "update", async_update_service)
@@ -64,15 +72,20 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     entry.async_on_unload(entry.add_update_listener(async_update_options))
 
     # Forward setup to the sensor platform (Standard correct format)
-    _LOGGER.warning("__init__.async_setup_entry: Forwarding setup to sensor and binary_sensor platforms.")
-    await hass.config_entries.async_forward_entry_setups(entry, ["sensor", "binary_sensor"])
-    
+    _LOGGER.warning(
+        "__init__.async_setup_entry: Forwarding setup to sensor and "
+        "binary_sensor platforms."
+    )
+    await hass.config_entries.async_forward_entry_setups(
+        entry, ["sensor", "binary_sensor"])
+
     return True
 
 async def async_update_options(hass: HomeAssistant, entry: ConfigEntry):
     """Handle options update."""
-    # This is called when options are updated. Reload the entry to apply all changes.    
-    _LOGGER.warning("__init__.async_update_options: Options updated, reloading integration.")
+    _LOGGER.warning(
+        "__init__.async_update_options: Options updated, reloading integration."
+    )
     await hass.config_entries.async_reload(entry.entry_id)
 
 

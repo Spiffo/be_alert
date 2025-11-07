@@ -22,7 +22,9 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up BE Alert binary sensors from a config entry."""
-    _LOGGER.warning(f"binary_sensor.async_setup_entry: Started for entry {entry.entry_id}.")
+    _LOGGER.warning(
+        "binary_sensor.async_setup_entry: Started for entry %s.",
+        entry.entry_id)
 
     entry_data = hass.data[DOMAIN][entry.entry_id]
     coordinator = entry_data["coordinator"]
@@ -39,13 +41,22 @@ async def async_setup_entry(
                 continue
 
             state = hass.states.get(entity_id)
-            friendly_name = state.name if state and state.name else entity_id.split(".")[-1]
+            if state and state.name:
+                friendly_name = state.name
+            else:
+                friendly_name = entity_id.split(".")[-1]
             sensor_name = f"BE Alert {friendly_name} Alerting"
             sensor_unique_id = f"be_alert_{_slug(entity_id)}_alerting"
-            
-            _LOGGER.warning(f"binary_sensor.async_setup_entry: Preparing location binary_sensor. Name: '{sensor_name}', Unique ID: '{sensor_unique_id}'")
+
+            _LOGGER.warning(
+                "binary_sensor.async_setup_entry: Preparing location "
+                "binary_sensor. Name: '%s', Unique ID: '%s'",
+                sensor_name, sensor_unique_id
+            )
             entities_to_add.append(
-                BeAlertLocationBinarySensor(hass, fetcher, coordinator, entity_id, sensor_name, sensor_unique_id, entry.entry_id)
+                BeAlertLocationBinarySensor(
+                    hass, fetcher, coordinator, entity_id, sensor_name,
+                    sensor_unique_id, entry.entry_id)
             )
 
     async_add_entities(entities_to_add, True)
@@ -66,7 +77,8 @@ class BeAlertLocationBinarySensor(BeAlertLocationEntity, BinarySensorEntity):
         unique_id: str,
         entry_id: str,
     ):
-        super().__init__(hass, fetcher, coordinator, source_entity_id, name, unique_id, entry_id)
+        super().__init__(hass, fetcher, coordinator, source_entity_id, name,
+                         unique_id, entry_id)
         self._attr_name = name
         self._attr_unique_id = unique_id
 

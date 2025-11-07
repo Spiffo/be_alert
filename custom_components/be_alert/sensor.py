@@ -4,7 +4,7 @@ from typing import Any
 import re
 
 from homeassistant.components.sensor import SensorEntity
-from homeassistant.helpers.entity_registry import async_get as async_get_entity_registry 
+from homeassistant.helpers.entity_registry import async_get as async_get_entity_registry
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, CoordinatorEntity
 from homeassistant.core import HomeAssistant
@@ -26,7 +26,9 @@ def _slug(name: str) -> str:
 
 async def async_setup_entry(hass: HomeAssistant, entry, async_add_entities, discovery_info=None):
     """Set up BE Alert sensors from a config entry."""
-    _LOGGER.warning(f"sensor.async_setup_entry: Started for entry {entry.entry_id}.")
+    _LOGGER.warning(
+        "sensor.async_setup_entry: Started for entry %s.",
+        entry.entry_id)
 
     # The coordinator is set up in __init__.py, so we just retrieve it.
     entry_data = hass.data[DOMAIN][entry.entry_id]
@@ -36,7 +38,10 @@ async def async_setup_entry(hass: HomeAssistant, entry, async_add_entities, disc
 
     # Get the list of configured sensors from the options
     configured_sensors = entry.options.get("sensors", [])
-    _LOGGER.warning(f"sensor.async_setup_entry: Found {len(configured_sensors)} sensor configurations in options: {configured_sensors}")
+    _LOGGER.warning(
+        "sensor.async_setup_entry: Found %d sensor configurations in "
+        "options: %s", len(configured_sensors), configured_sensors
+    )
 
     # Proactively remove stale entities from the registry for this entry
     try:
@@ -51,7 +56,8 @@ async def async_setup_entry(hass: HomeAssistant, entry, async_add_entities, disc
                 if eid:
                     slug_eid = _slug(eid)
                     desired_unique_ids.add(f"be_alert_{slug_eid}")
-                    desired_unique_ids.add(f"be_alert_{slug_eid}_alerting") # For binary sensor
+                    # For binary sensor
+                    desired_unique_ids.add(f"be_alert_{slug_eid}_alerting")
         # Remove entities for this config entry that are no longer desired
         for ent in list(registry.entities.values()):
             if ent.config_entry_id != entry.entry_id:
@@ -59,10 +65,15 @@ async def async_setup_entry(hass: HomeAssistant, entry, async_add_entities, disc
             if ent.domain not in ("sensor", "binary_sensor"):
                 continue
             if ent.unique_id not in desired_unique_ids:
-                _LOGGER.debug("sensor.async_setup_entry: Removing stale entity %s (unique_id=%s)", ent.entity_id, ent.unique_id)
+                _LOGGER.debug(
+                    "sensor.async_setup_entry: Removing stale entity %s "
+                    "(unique_id=%s)", ent.entity_id, ent.unique_id
+                )
                 registry.async_remove(ent.entity_id)
     except Exception as err:
-        _LOGGER.debug("sensor.async_setup_entry: Failed to cleanup stale entities: %s", err)
+        _LOGGER.debug(
+            "sensor.async_setup_entry: Failed to cleanup stale entities: %s",
+            err)
 
     for sensor_config in configured_sensors:
         sensor_type = sensor_config.get("type")
@@ -72,23 +83,39 @@ async def async_setup_entry(hass: HomeAssistant, entry, async_add_entities, disc
             # Create the "All" sensor if not already present
             # The unique_id for the "All" sensor is 'be_alert_all'
             _LOGGER.warning("sensor.async_setup_entry: Preparing 'all' sensor.")
-            entities_to_add.append(BeAlertAllSensor(fetcher, coordinator, entry.entry_id))
+            entities_to_add.append(
+                BeAlertAllSensor(fetcher, coordinator, entry.entry_id))
 
         elif sensor_type in (LOCATION_SOURCE_DEVICE, LOCATION_SOURCE_ZONE):
             entity_id = sensor_config.get(CONF_ENTITY_ID)
             if not entity_id:
-                _LOGGER.warning(f"sensor.async_setup_entry: Skipping location sensor with no entity_id: {sensor_config}")
+                _LOGGER.warning(
+                    "sensor.async_setup_entry: Skipping location sensor with "
+                    "no entity_id: %s", sensor_config
+                )
                 continue
 
             state = hass.states.get(entity_id)
-            friendly_name = state.name if state and state.name else entity_id.split(".")[-1]
+            if state and state.name:
+                friendly_name = state.name
+            else:
+                friendly_name = entity_id.split(".")[-1]
             sensor_name = f"BE Alert {friendly_name}"
             sensor_unique_id = f"be_alert_{_slug(entity_id)}"
-            _LOGGER.warning(f"sensor.async_setup_entry: Preparing location sensor. Name: '{sensor_name}', Unique ID: '{sensor_unique_id}' for entry {entry.entry_id}")
-            entities_to_add.append(BeAlertLocationSensor(hass, fetcher, coordinator, entity_id, sensor_name, sensor_unique_id, entry.entry_id))
+            _LOGGER.warning(
+                "sensor.async_setup_entry: Preparing location sensor. Name: "
+                "'%s', Unique ID: '%s' for entry %s",
+                sensor_name, sensor_unique_id, entry.entry_id
+            )
+            entities_to_add.append(BeAlertLocationSensor(
+                hass, fetcher, coordinator, entity_id, sensor_name,
+                sensor_unique_id, entry.entry_id))
 
     if entities_to_add:
-        _LOGGER.warning(f"sensor.async_setup_entry: Calling async_add_entities with {len(entities_to_add)} entities.")
+        _LOGGER.warning(
+            "sensor.async_setup_entry: Calling async_add_entities with %d "
+            "entities.", len(entities_to_add)
+        )
         async_add_entities(entities_to_add, True)
     else:
         _LOGGER.warning("sensor.async_setup_entry: No entities to add.")
@@ -122,7 +149,9 @@ class BeAlertDevice(CoordinatorEntity):
 class BeAlertAllSensor(BeAlertDevice, SensorEntity):
     """Sensor showing total number of active alerts and full list."""
 
-    def __init__(self, fetcher: BeAlertFetcher, coordinator: DataUpdateCoordinator, entry_id: str):
+    def __init__(
+            self, fetcher: BeAlertFetcher, coordinator: DataUpdateCoordinator,
+            entry_id: str):
         super().__init__(coordinator, entry_id)
         self._fetcher = fetcher
 
@@ -184,7 +213,7 @@ class BeAlertLocationEntity(CoordinatorEntity):
             identifiers={(DOMAIN, slug)},
             name=device_name,
             manufacturer="BE-Alert",
-            model=f"Tracked {source_entity_id.split('.')[0]}",
+            model=f"Tracked {source_entity_id.split('.')[0]}",  # type: ignore
             via_device=(DOMAIN, entry_id),
         )
 
@@ -231,7 +260,10 @@ class BeAlertLocationEntity(CoordinatorEntity):
             self._source_has_coords = True
         else:
             self._source_has_coords = False
-            _LOGGER.debug("Could not get coordinates for %s, location sensor unavailable.", self._source_entity)
+            _LOGGER.debug(
+                "Could not get coordinates for %s, location sensor "
+                "unavailable.", self._source_entity
+            )
 
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
@@ -239,10 +271,14 @@ class BeAlertLocationEntity(CoordinatorEntity):
         self._update_location()
         # Then, find alerts for that location if source is available
         if self._source_has_coords:
-            self._matches = self._fetcher.alerts_affecting_point(self._lon, self._lat)
+            self._matches = self._fetcher.alerts_affecting_point(
+                self._lon, self._lat)
         else:
             self._matches = []
-        _LOGGER.debug("BE Alert: %s found %d active alerts (available=%s)", self._name, len(self._matches), self._source_has_coords)
+        _LOGGER.debug(
+            "BE Alert: %s found %d active alerts (available=%s)",
+            self._name, len(self._matches), self._source_has_coords
+        )
         self.async_write_ha_state()
 
 
@@ -259,7 +295,8 @@ class BeAlertLocationSensor(BeAlertLocationEntity, SensorEntity):
         unique_id: str,
         entry_id: str,
     ):
-        super().__init__(hass, fetcher, coordinator, source_entity_id, name, unique_id, entry_id)
+        super().__init__(hass, fetcher, coordinator, source_entity_id, name,
+                         unique_id, entry_id)
         self._attr_name = name
         self._attr_unique_id = unique_id
 

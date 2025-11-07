@@ -34,11 +34,9 @@
                 "data": {
                     "sensor_type": {
                         "name": "Type of sensor to add",
-                        "options": {
-                            "all": "All Alerts (Belgium-wide)",
-                            "zone": "Zone-based Sensor",
-                            "device": "Device-based or person-based Sensor"
-                        }
+                        "all": "All Alerts (Belgium-wide)",
+                        "zone": "Zone-based Sensor",
+                        "device": "Device-based or person-based Sensor"
                     }
                 }
             },

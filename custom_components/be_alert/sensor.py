@@ -4,9 +4,11 @@ from typing import Any
 import re
 
 from homeassistant.components.sensor import SensorEntity
-from homeassistant.helpers.entity_registry import async_get as async_get_entity_registry
+from homeassistant.helpers.entity_registry import (
+    async_get as async_get_entity_registry)
 from homeassistant.helpers.device_registry import DeviceInfo
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, CoordinatorEntity
+from homeassistant.helpers.update_coordinator import (
+    DataUpdateCoordinator, CoordinatorEntity)
 from homeassistant.core import HomeAssistant
 from homeassistant.const import CONF_ENTITY_ID
 
@@ -24,7 +26,9 @@ def _slug(name: str) -> str:
     slug = re.sub(r"_+", "_", slug).strip("_")
     return slug or "unknown"
 
-async def async_setup_entry(hass: HomeAssistant, entry, async_add_entities, discovery_info=None):
+
+async def async_setup_entry(
+        hass: HomeAssistant, entry, async_add_entities, discovery_info=None):
     """Set up BE Alert sensors from a config entry."""
     _LOGGER.warning(
         "sensor.async_setup_entry: Started for entry %s.",
@@ -77,7 +81,9 @@ async def async_setup_entry(hass: HomeAssistant, entry, async_add_entities, disc
 
     for sensor_config in configured_sensors:
         sensor_type = sensor_config.get("type")
-        _LOGGER.warning(f"sensor.async_setup_entry: Processing sensor config: {sensor_config}")
+        _LOGGER.warning(
+            "sensor.async_setup_entry: Processing sensor config: %s",
+            sensor_config)
 
         if sensor_type == "all":
             # Create the "All" sensor if not already present
@@ -134,6 +140,7 @@ def _get_coordinates(hass: HomeAssistant, entity_id: str):
 
 
 # ------------------- Global sensor (all alerts) -------------------
+
 class BeAlertDevice(CoordinatorEntity):
     """Base class for BE Alert entities linked to the main device."""
     def __init__(self, coordinator: DataUpdateCoordinator, entry_id: str):
@@ -145,6 +152,7 @@ class BeAlertDevice(CoordinatorEntity):
             model="Alert Feed",
             entry_type="service",
         )
+
 
 class BeAlertAllSensor(BeAlertDevice, SensorEntity):
     """Sensor showing total number of active alerts and full list."""
@@ -187,6 +195,7 @@ class BeAlertAllSensor(BeAlertDevice, SensorEntity):
 
 
 # ------------------- Per-location sensor (zone/device) -------------------
+
 class BeAlertLocationEntity(CoordinatorEntity):
     """Sensor showing number of alerts that affect the configured zone/device."""
 
@@ -205,7 +214,8 @@ class BeAlertLocationEntity(CoordinatorEntity):
         self._source_entity = source_entity_id
         self._name = name  # Store name for logging
 
-        # Create a new device for each tracked location, linked to the main integration device
+        # Create a new device for each tracked location, linked to the main
+        # integration device
         slug = _slug(source_entity_id)
         state = hass.states.get(source_entity_id)
         device_name = state.name if state else source_entity_id
@@ -213,7 +223,7 @@ class BeAlertLocationEntity(CoordinatorEntity):
             identifiers={(DOMAIN, slug)},
             name=device_name,
             manufacturer="BE-Alert",
-            model=f"Tracked {source_entity_id.split('.')[0]}",  # type: ignore
+            model=f"Tracked {source_entity_id.split('.')[0]}",
             via_device=(DOMAIN, entry_id),
         )
 
@@ -272,7 +282,8 @@ class BeAlertLocationEntity(CoordinatorEntity):
         # Then, find alerts for that location if source is available
         if self._source_has_coords:
             self._matches = self._fetcher.alerts_affecting_point(
-                self._lon, self._lat)
+                self._lon, self._lat
+            )
         else:
             self._matches = []
         _LOGGER.debug(
@@ -295,8 +306,9 @@ class BeAlertLocationSensor(BeAlertLocationEntity, SensorEntity):
         unique_id: str,
         entry_id: str,
     ):
-        super().__init__(hass, fetcher, coordinator, source_entity_id, name,
-                         unique_id, entry_id)
+        super().__init__(
+            hass, fetcher, coordinator, source_entity_id, name, unique_id,
+            entry_id)
         self._attr_name = name
         self._attr_unique_id = unique_id
 

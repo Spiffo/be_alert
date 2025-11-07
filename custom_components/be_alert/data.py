@@ -40,11 +40,14 @@ class BeAlertFetcher:
             polygons = []
             for area in item.get("area", []):
                 for coordset in area.get("coordinates", []):
-                    if coordset.get("type") == "LineString":
-                        points = [(p["x"], p["y"]) for p in coordset.get("coordinates", [])]
+                    if coordset.get("type") == "LineString":  # type: ignore
+                        points = [
+                            (p["x"], p["y"]) for p in
+                            coordset.get("coordinates", [])]
                         if len(points) >= 3:
                             try:
-                                polygons.append(shapely.geometry.Polygon(points))
+                                polygons.append(
+                                    shapely.geometry.Polygon(points))
                             except Exception:
                                 _LOGGER.warning(
                                     "BeAlertFetcher: invalid polygon points, "
@@ -88,4 +91,3 @@ class BeAlertFetcher:
                         exc_info=True
                     )
         return matches
- 

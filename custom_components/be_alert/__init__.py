@@ -25,8 +25,8 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up BE Alert from a config entry."""
     _LOGGER.warning(
-        "__init__.async_setup_entry: Setting up entry %s with options: %s",
-        entry.entry_id, entry.options
+        "__init__.async_setup_entry: Setting up entry %s with options: "
+        "%s", entry.entry_id, entry.options
     )
 
     hass.data.setdefault(DOMAIN, {})
@@ -62,7 +62,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         async def async_update_service(service_call):
             """Handle the service call to update all BE Alert coordinators."""
             _LOGGER.info(
-                "BE Alert update service called, refreshing all coordinators."
+                "BE Alert update service called, refreshing all "
+                "coordinators."
             )
             for entry_data in hass.data[DOMAIN].values():
                 await entry_data["coordinator"].async_request_refresh()
@@ -81,10 +82,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     return True
 
+
 async def async_update_options(hass: HomeAssistant, entry: ConfigEntry):
     """Handle options update."""
     _LOGGER.warning(
-        "__init__.async_update_options: Options updated, reloading integration."
+        "__init__.async_update_options: Options updated, reloading "
+        "integration."
     )
     await hass.config_entries.async_reload(entry.entry_id)
 
@@ -93,7 +96,8 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a BE Alert config entry."""
     _LOGGER.warning(f"Unloading BE Alert entry {entry.entry_id}")
     platforms = ["sensor", "binary_sensor"]
-    unload_ok = await hass.config_entries.async_unload_platforms(entry, platforms)
+    unload_ok = await hass.config_entries.async_unload_platforms(
+        entry, platforms)
 
     if unload_ok:
         hass.data[DOMAIN].pop(entry.entry_id)

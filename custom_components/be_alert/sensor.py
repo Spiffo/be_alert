@@ -1,9 +1,11 @@
 """BE Alert sensor platform."""
 import logging
+from typing import Any
 import re
 
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.helpers.entity_registry import async_get as async_get_entity_registry 
+from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, CoordinatorEntity
 from homeassistant.core import HomeAssistant
 from homeassistant.const import CONF_ENTITY_ID
@@ -47,12 +49,14 @@ async def async_setup_entry(hass: HomeAssistant, entry, async_add_entities, disc
             elif s_type in (LOCATION_SOURCE_DEVICE, LOCATION_SOURCE_ZONE):
                 eid = s.get(CONF_ENTITY_ID)
                 if eid:
-                    desired_unique_ids.add(f"be_alert_location_{_slug(eid)}")
+                    slug_eid = _slug(eid)
+                    desired_unique_ids.add(f"be_alert_{slug_eid}")
+                    desired_unique_ids.add(f"be_alert_{slug_eid}_alerting") # For binary sensor
         # Remove entities for this config entry that are no longer desired
         for ent in list(registry.entities.values()):
             if ent.config_entry_id != entry.entry_id:
                 continue
-            if ent.domain != "sensor":
+            if ent.domain not in ("sensor", "binary_sensor"):
                 continue
             if ent.unique_id not in desired_unique_ids:
                 _LOGGER.debug("sensor.async_setup_entry: Removing stale entity %s (unique_id=%s)", ent.entity_id, ent.unique_id)
@@ -68,7 +72,7 @@ async def async_setup_entry(hass: HomeAssistant, entry, async_add_entities, disc
             # Create the "All" sensor if not already present
             # The unique_id for the "All" sensor is 'be_alert_all'
             _LOGGER.warning("sensor.async_setup_entry: Preparing 'all' sensor.")
-            entities_to_add.append(BeAlertAllSensor(fetcher, coordinator, hass))
+            entities_to_add.append(BeAlertAllSensor(fetcher, coordinator, entry.entry_id))
 
         elif sensor_type in (LOCATION_SOURCE_DEVICE, LOCATION_SOURCE_ZONE):
             entity_id = sensor_config.get(CONF_ENTITY_ID)
@@ -79,9 +83,9 @@ async def async_setup_entry(hass: HomeAssistant, entry, async_add_entities, disc
             state = hass.states.get(entity_id)
             friendly_name = state.name if state and state.name else entity_id.split(".")[-1]
             sensor_name = f"BE Alert {friendly_name}"
-            sensor_unique_id = f"be_alert_location_{_slug(entity_id)}"
-            _LOGGER.warning(f"sensor.async_setup_entry: Preparing location sensor. Name: '{sensor_name}', Unique ID: '{sensor_unique_id}'")
-            entities_to_add.append(BeAlertLocationSensor(fetcher, coordinator, entity_id, sensor_name, sensor_unique_id))
+            sensor_unique_id = f"be_alert_{_slug(entity_id)}"
+            _LOGGER.warning(f"sensor.async_setup_entry: Preparing location sensor. Name: '{sensor_name}', Unique ID: '{sensor_unique_id}' for entry {entry.entry_id}")
+            entities_to_add.append(BeAlertLocationSensor(hass, fetcher, coordinator, entity_id, sensor_name, sensor_unique_id, entry.entry_id))
 
     if entities_to_add:
         _LOGGER.warning(f"sensor.async_setup_entry: Calling async_add_entities with {len(entities_to_add)} entities.")
@@ -103,19 +107,28 @@ def _get_coordinates(hass: HomeAssistant, entity_id: str):
 
 
 # ------------------- Global sensor (all alerts) -------------------
-class BeAlertAllSensor(CoordinatorEntity, SensorEntity):
+class BeAlertDevice(CoordinatorEntity):
+    """Base class for BE Alert entities linked to the main device."""
+    def __init__(self, coordinator: DataUpdateCoordinator, entry_id: str):
+        super().__init__(coordinator)
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry_id)},
+            name="BE Alert",
+            manufacturer="BE-Alert",
+            model="Alert Feed",
+            entry_type="service",
+        )
 
+class BeAlertAllSensor(BeAlertDevice, SensorEntity):
     """Sensor showing total number of active alerts and full list."""
 
-    def __init__(self, fetcher: BeAlertFetcher, coordinator: DataUpdateCoordinator, hass: HomeAssistant):
-        super().__init__(coordinator)
+    def __init__(self, fetcher: BeAlertFetcher, coordinator: DataUpdateCoordinator, entry_id: str):
+        super().__init__(coordinator, entry_id)
         self._fetcher = fetcher
-        self._hass = hass
 
     @property
-    def name(self):
+    def name(self) -> str:
         return "BE Alert All"
-
     @property
     def unique_id(self):
         return "be_alert_all"
@@ -126,7 +139,7 @@ class BeAlertAllSensor(CoordinatorEntity, SensorEntity):
 
     @property
     def extra_state_attributes(self):
-        return {
+        attrs: dict[str, Any] = {
             "alerts": [
                 {
                     "title": a["title"],
@@ -141,26 +154,40 @@ class BeAlertAllSensor(CoordinatorEntity, SensorEntity):
             ],
             "last_checked": self._fetcher.last_checked,
         }
+        return attrs
 
 
 # ------------------- Per-location sensor (zone/device) -------------------
-class BeAlertLocationSensor(CoordinatorEntity, SensorEntity):
-
+class BeAlertLocationEntity(CoordinatorEntity):
     """Sensor showing number of alerts that affect the configured zone/device."""
 
     def __init__(
         self,
+        hass: HomeAssistant,
         fetcher: BeAlertFetcher,
         coordinator: DataUpdateCoordinator,
         source_entity_id: str,
         name: str,
         unique_id: str,
+        entry_id: str,
     ):
         super().__init__(coordinator)
-        self._fetcher = fetcher
+        self._fetcher: BeAlertFetcher = fetcher
         self._source_entity = source_entity_id
-        self._name = name
-        self._unique_id = unique_id
+        self._name = name  # Store name for logging
+
+        # Create a new device for each tracked location, linked to the main integration device
+        slug = _slug(source_entity_id)
+        state = hass.states.get(source_entity_id)
+        device_name = state.name if state else source_entity_id
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, slug)},
+            name=device_name,
+            manufacturer="BE-Alert",
+            model=f"Tracked {source_entity_id.split('.')[0]}",
+            via_device=(DOMAIN, entry_id),
+        )
+
         # These will be populated during the update
         self._lat: float | None = None
         self._lon: float | None = None
@@ -168,22 +195,9 @@ class BeAlertLocationSensor(CoordinatorEntity, SensorEntity):
         self._source_has_coords: bool = False
 
     @property
-    def name(self):
-        return self._name
-
-    @property
-    def unique_id(self):
-        return self._unique_id
-
-    @property
-    def state(self):
-        """Return the number of active alerts for the location."""
-        return len(self._matches)
-
-    @property
     def extra_state_attributes(self):
         """Return the state attributes."""
-        attrs = {"source": self._source_entity}
+        attrs: dict[str, Any] = {"source": self._source_entity}
         if self._matches:
             attrs["alerts"] = [
                 {
@@ -230,3 +244,26 @@ class BeAlertLocationSensor(CoordinatorEntity, SensorEntity):
             self._matches = []
         _LOGGER.debug("BE Alert: %s found %d active alerts (available=%s)", self._name, len(self._matches), self._source_has_coords)
         self.async_write_ha_state()
+
+
+class BeAlertLocationSensor(BeAlertLocationEntity, SensorEntity):
+    """Sensor showing number of alerts that affect the configured zone/device."""
+
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        fetcher: BeAlertFetcher,
+        coordinator: DataUpdateCoordinator,
+        source_entity_id: str,
+        name: str,
+        unique_id: str,
+        entry_id: str,
+    ):
+        super().__init__(hass, fetcher, coordinator, source_entity_id, name, unique_id, entry_id)
+        self._attr_name = name
+        self._attr_unique_id = unique_id
+
+    @property
+    def state(self):
+        """Return the number of active alerts for the location."""
+        return len(self._matches)

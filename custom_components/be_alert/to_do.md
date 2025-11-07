@@ -22,5 +22,6 @@ TO DO / TO FIX:
 
 # TODO: zone or device alerts should be boolean sensors: alerting or not alerting
 
+# TODO: before you call the webservice, check if there are any sensors or binary sensors that exist under this integration
 
 # DONE: check if unloading a sensor actually happens

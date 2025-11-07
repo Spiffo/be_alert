@@ -60,8 +60,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     entry.async_on_unload(entry.add_update_listener(async_update_options))
 
     # Forward setup to the sensor platform (Standard correct format)
-    _LOGGER.warning("__init__.async_setup_entry: Forwarding setup to sensor platform.")
-    await hass.config_entries.async_forward_entry_setups(entry, ["sensor"])
+    _LOGGER.warning("__init__.async_setup_entry: Forwarding setup to sensor and binary_sensor platforms.")
+    await hass.config_entries.async_forward_entry_setups(entry, ["sensor", "binary_sensor"])
     
     return True
 
@@ -75,8 +75,8 @@ async def async_update_options(hass: HomeAssistant, entry: ConfigEntry):
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a BE Alert config entry."""
     _LOGGER.warning(f"Unloading BE Alert entry {entry.entry_id}")
-
-    unload_ok = await hass.config_entries.async_unload_platforms(entry, ["sensor"])
+    platforms = ["sensor", "binary_sensor"]
+    unload_ok = await hass.config_entries.async_unload_platforms(entry, platforms)
 
     if unload_ok:
         hass.data[DOMAIN].pop(entry.entry_id)

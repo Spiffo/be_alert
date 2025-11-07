@@ -1,58 +1,55 @@
 {
     "title": "BE Alert",
     "config": {
-        "title_all": "BE Alert All#NL#",
         "step": {
             "user": {
-                "title": "Add BE Alert Integration#NL#",
-                "description": "This will set up the central BE Alert integration. You can add individual sensors after this step.#NL#"
+                "title": "Voeg BE Alert Integratie toe",
+                "description": "Dit stelt de centrale BE Alert-integratie in. U kunt na deze stap individuele sensoren toevoegen."
             }
         },
         "abort": {
-            "single_instance_allowed": "Only one instance of the BE Alert integration is allowed.#NL#",
-            "all_sensor_exists": "The 'All Alerts' sensor is already configured.#NL#",
-            "no_sensors_to_remove": "There are no sensors to remove.#NL#",
-            "entity_already_configured": "A sensor for this entity is already configured.#NL#"
+            "single_instance_allowed": "Er is slechts één instantie van de BE Alert-integratie toegestaan.",
+            "all_sensor_exists": "De 'Alle meldingen'-sensor is al geconfigureerd.",
+            "no_sensors_to_remove": "Er zijn geen sensoren om te verwijderen.",
+            "entity_already_configured": "Een sensor voor deze entiteit is al geconfigureerd."
         }
     },
     "options": {
         "step": {
             "init": {
                 "menu_options": {
-                    "add_sensor": "Add a new sensor#NL#",
-                    "remove_sensor": "Remove a sensor#NL#",
-                    "settings": "Global Settings#NL#"
+                    "add_sensor": "Voeg een nieuwe sensor toe",
+                    "remove_sensor": "Verwijder een sensor",
+                    "settings": "Algemene instellingen"
                 }
             },
             "settings": {
-                "title": "Global Settings#NL#",
+                "title": "Algemene instellingen",
                 "data": {
-                    "scan_interval": "Update interval (minutes)#NL#"
+                    "scan_interval": "Update-interval (minuten)"
                 }
             },
             "add_sensor": {
-                "title": "Add Sensor#NL#",
+                "title": "Sensor toevoegen",
                 "data": {
                     "sensor_type": {
-                        "name": "Type of sensor to add#NL#",
-                        "options": {
-                            "all": "All Alerts (Belgium-wide)#NL#",
-                            "zone": "Zone-based Sensor#NL#",
-                            "device": "Device-based or person-based Sensor#NL#"
-                        }
+                        "name": "Type sensor om toe te voegen",
+                        "all": "Alle meldingen (België-breed)",
+                        "zone": "Zone-gebaseerde sensor",
+                        "device": "Apparaat- of persoonsgebaseerde sensor"
                     }
                 }
             },
             "select_entity": {
-                "title": "Select Entity#NL#",
+                "title": "Selecteer entiteit",
                 "data": {
-                    "entity_id": "Entity to track#NL#"
+                    "entity_id": "Te volgen entiteit"
                 }
             },
             "remove_sensor": {
-                "title": "Remove Sensor#NL#",
+                "title": "Sensor verwijderen",
                 "data": {
-                    "sensor_to_remove": "Sensor to remove#NL#"
+                    "sensor_to_remove": "Te verwijderen sensor"
                 }
             }
         }

@@ -1,0 +1,4 @@
+# Describes the services provided by the BE Alert integration.
+update:
+  name: Update
+  description: Forces an immediate update of the BE Alert feed data.

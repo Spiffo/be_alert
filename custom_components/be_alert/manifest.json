@@ -1,0 +1,19 @@
+{
+    "domain": "be_alert",
+    "name": "BE Alert",
+    "version": "0.1.0",
+    "requirements": [
+        "aiohttp",
+        "shapely"
+    ],
+    "dependencies": [],
+    "codeowners": [
+        "@Spiffo"
+    ],
+    "documentation": "https://github.com/Spiffo/be-alert",
+    "issue_tracker": "https://github.com/Spiffo/be-alert/issues",
+    "iot_class": "cloud_polling",
+    "config_flow": true,
+    "integration_type": "service",
+    "translation_key": "be_alert"
+}

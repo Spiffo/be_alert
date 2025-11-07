@@ -1,0 +1,35 @@
+name: Validate Home Assistant Integration
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install Home Assistant lint tools
+        run: |
+          pip install homeassistant mypy flake8 pylint
+
+      - name: Run hassfest validation
+        run: hassfest validate
+
+      - name: Lint with flake8
+        run: flake8 custom_components/be_alert
+
+      - name: Type check with mypy
+        run: mypy custom_components/be_alert
+
+      - name: Pylint
+        run: pylint custom_components/be_alert

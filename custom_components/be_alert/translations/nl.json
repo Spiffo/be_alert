@@ -1,0 +1,60 @@
+{
+    "title": "BE Alert",
+    "config": {
+        "title_all": "BE Alert All#NL#",
+        "step": {
+            "user": {
+                "title": "Add BE Alert Integration#NL#",
+                "description": "This will set up the central BE Alert integration. You can add individual sensors after this step.#NL#"
+            }
+        },
+        "abort": {
+            "single_instance_allowed": "Only one instance of the BE Alert integration is allowed.#NL#",
+            "all_sensor_exists": "The 'All Alerts' sensor is already configured.#NL#",
+            "no_sensors_to_remove": "There are no sensors to remove.#NL#",
+            "entity_already_configured": "A sensor for this entity is already configured.#NL#"
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "menu_options": {
+                    "add_sensor": "Add a new sensor#NL#",
+                    "remove_sensor": "Remove a sensor#NL#",
+                    "settings": "Global Settings#NL#"
+                }
+            },
+            "settings": {
+                "title": "Global Settings#NL#",
+                "data": {
+                    "scan_interval": "Update interval (minutes)#NL#"
+                }
+            },
+            "add_sensor": {
+                "title": "Add Sensor#NL#",
+                "data": {
+                    "sensor_type": {
+                        "name": "Type of sensor to add#NL#",
+                        "options": {
+                            "all": "All Alerts (Belgium-wide)#NL#",
+                            "zone": "Zone-based Sensor#NL#",
+                            "device": "Device-based or person-based Sensor#NL#"
+                        }
+                    }
+                }
+            },
+            "select_entity": {
+                "title": "Select Entity#NL#",
+                "data": {
+                    "entity_id": "Entity to track#NL#"
+                }
+            },
+            "remove_sensor": {
+                "title": "Remove Sensor#NL#",
+                "data": {
+                    "sensor_to_remove": "Sensor to remove#NL#"
+                }
+            }
+        }
+    }
+}

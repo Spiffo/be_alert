@@ -20,10 +20,11 @@ jobs:
 
       - name: Install Home Assistant lint tools
         run: |
-          pip install homeassistant mypy flake8 pylint
+          pip install mypy flake8 pylint
 
       - name: Run hassfest validation
-        run: hassfest validate
+        uses: home-assistant/actions/hassfest@master
+
 
       - name: Lint with flake8
         run: flake8 custom_components/be_alert

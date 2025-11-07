@@ -25,8 +25,8 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up BE Alert from a config entry."""
     _LOGGER.warning(
-        "__init__.async_setup_entry: Setting up entry %s with options: "
-        "%s", entry.entry_id, entry.options
+        "__init__.async_setup_entry: Setting up entry %s with options: %s",
+        entry.entry_id, entry.options
     )
 
     hass.data.setdefault(DOMAIN, {})
@@ -62,8 +62,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         async def async_update_service(service_call):
             """Handle the service call to update all BE Alert coordinators."""
             _LOGGER.info(
-                "BE Alert update service called, refreshing all "
-                "coordinators."
+                "BE Alert update service called, refreshing all coordinators."
             )
             for entry_data in hass.data[DOMAIN].values():
                 await entry_data["coordinator"].async_request_refresh()

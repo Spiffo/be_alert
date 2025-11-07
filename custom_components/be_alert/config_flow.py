@@ -90,9 +90,8 @@ class BEAlertOptionsFlow(config_entries.OptionsFlow):
             return self.async_create_entry(title="", data=new_options)
 
         schema = vol.Schema({
-            vol.Optional("scan_interval", default=options.get(
-                "scan_interval", DEFAULT_SCAN_INTERVAL)): vol.All(
-                vol.Coerce(int), vol.Range(min=5)
+            vol.Optional("scan_interval", default=options.get("scan_interval",
+                         DEFAULT_SCAN_INTERVAL)): vol.All(vol.Coerce(int), vol.Range(min=5)
             ),
         })
         return self.async_show_form(
@@ -107,8 +106,8 @@ class BEAlertOptionsFlow(config_entries.OptionsFlow):
         if user_input is not None:
             sensor_type = user_input["sensor_type"]
             _LOGGER.warning(
-                "OptionsFlow.async_step_add_sensor: User selected "
-                "sensor_type: %s", sensor_type
+                "OptionsFlow.async_step_add_sensor: User selected sensor_type: "
+                "%s", sensor_type
             )
             if sensor_type == "all":  # type: ignore
                 # Handle 'all' sensor immediately
@@ -132,8 +131,8 @@ class BEAlertOptionsFlow(config_entries.OptionsFlow):
             vol.Required("sensor_type"): selector.SelectSelector(
                 selector.SelectSelectorConfig(
                     mode=selector.SelectSelectorMode.LIST,
-                    options=["all", LOCATION_SOURCE_ZONE,
-                             LOCATION_SOURCE_DEVICE],
+                    options=["all", LOCATION_SOURCE_ZONE, LOCATION_SOURCE_DEVICE
+                             ],
                 )
             )
         })
@@ -147,8 +146,8 @@ class BEAlertOptionsFlow(config_entries.OptionsFlow):
         sensor_type = self._sensor_type
         if sensor_type == LOCATION_SOURCE_DEVICE:
             _LOGGER.warning(
-                "OptionsFlow.async_step_select_entity: Filtering for "
-                "device/person entities."
+                "OptionsFlow.async_step_select_entity: Filtering for device/person "
+                "entities."
             )
             # Build a list of eligible entities: persons with location
             # and device_trackers with GPS source.
@@ -187,20 +186,19 @@ class BEAlertOptionsFlow(config_entries.OptionsFlow):
             )
             sensors = list(options.get("sensors", []))
             # Check for duplicates
-            if not any(s.get(CONF_ENTITY_ID) == entity_id for s in sensors):  # type: ignore
-                sensors.append(
-                    {"type": sensor_type, CONF_ENTITY_ID: entity_id})
+            if not any(s.get(CONF_ENTITY_ID) == entity_id for s in sensors):
+                sensors.append({"type": sensor_type,
+                               CONF_ENTITY_ID: entity_id})
                 new_options = {**options, "sensors": sensors}
                 _LOGGER.warning(
-                    "OptionsFlow.async_step_select_entity: Adding sensor. "
-                    "New options: %s", new_options
+                    "OptionsFlow.async_step_select_entity: Adding sensor. New "
+                    "options: %s", new_options
                 )
-                return self.async_create_entry(
-                    title="", data=new_options)
+                return self.async_create_entry(title="", data=new_options)
             else:
                 errors["base"] = "entity_already_configured"
 
-        schema = vol.Schema({vol.Required(CONF_ENTITY_ID): selector.EntitySelector(selector_cfg)})
+        schema = vol.Schema({vol.Required(CONF_ENTITY_ID): selector.EntitySelector(selector_cfg)})  # noqa: E501
         return self.async_show_form(step_id="select_entity", data_schema=schema, errors=errors)
 
     async def async_step_remove_sensor(self, user_input: dict[str, Any] | None = None):

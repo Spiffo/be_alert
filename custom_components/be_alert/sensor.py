@@ -66,8 +66,8 @@ async def async_setup_entry(
         for ent in list(registry.entities.values()):
             if ent.config_entry_id != entry.entry_id:
                 continue
-            if ent.domain not in ("sensor", "binary_sensor"):
-                continue
+            if ent.domain not in ("sensor", "binary_sensor"):  # noqa: E501
+                continue  # noqa: E501
             if ent.unique_id not in desired_unique_ids:
                 _LOGGER.debug(
                     "sensor.async_setup_entry: Removing stale entity %s "
@@ -110,8 +110,8 @@ async def async_setup_entry(
             sensor_unique_id = f"be_alert_{_slug(entity_id)}"
             _LOGGER.warning(
                 "sensor.async_setup_entry: Preparing location sensor. Name: "
-                "'%s', Unique ID: '%s' for entry %s",
-                sensor_name, sensor_unique_id, entry.entry_id
+                "'%s', Unique ID: '%s' for entry %s", sensor_name,
+                sensor_unique_id, entry.entry_id
             )
             entities_to_add.append(BeAlertLocationSensor(
                 hass, fetcher, coordinator, entity_id, sensor_name,
@@ -218,7 +218,7 @@ class BeAlertLocationEntity(CoordinatorEntity):
         # integration device
         slug = _slug(source_entity_id)
         state = hass.states.get(source_entity_id)
-        device_name = state.name if state else source_entity_id
+        device_name = state.name if state else source_entity_id  # type: ignore
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, slug)},
             name=device_name,
@@ -307,8 +307,8 @@ class BeAlertLocationSensor(BeAlertLocationEntity, SensorEntity):
         entry_id: str,
     ):
         super().__init__(
-            hass, fetcher, coordinator, source_entity_id, name, unique_id,
-            entry_id)
+            hass, fetcher, coordinator, source_entity_id, name,
+            unique_id, entry_id)
         self._attr_name = name
         self._attr_unique_id = unique_id
 

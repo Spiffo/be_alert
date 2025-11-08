@@ -18,13 +18,20 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install Home Assistant lint tools
+      - name: Install dependencies
         run: |
-          pip install mypy flake8 pylint
+          pip install \
+            homeassistant \
+            aiohttp \
+            shapely \
+            voluptuous \
+            mypy \
+            flake8 \
+            pylint \
+            types-shapely
 
       - name: Run hassfest validation
         uses: home-assistant/actions/hassfest@master
-
 
       - name: Lint with flake8
         run: flake8 custom_components/be_alert

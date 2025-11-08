@@ -1,7 +1,6 @@
 """BE Alert sensor platform."""
 
 import logging
-from typing import Any
 import re
 
 from homeassistant.components.sensor import SensorEntity
@@ -16,20 +15,10 @@ from homeassistant.helpers.update_coordinator import (
 from homeassistant.core import HomeAssistant
 from homeassistant.const import CONF_ENTITY_ID
 
-from .const import DOMAIN, LOCATION_SOURCE_DEVICE, LOCATION_SOURCE_ZONE
+from .const import DOMAIN, LOCATION_SOURCE_DEVICE, LOCATION_SOURCE_ZONE, Any
 from .binary_sensor import _create_location_entities
 from .data import BeAlertFetcher
-
-_LOGGER = logging.getLogger(__name__)
-
-
-def _slug(name: str) -> str:
-    """Create a slug suitable for unique_id and entity_id suffix."""
-    if not name:
-        return "unknown"
-    slug = re.sub(r"[^a-zA-Z0-9_]+", "_", name.strip().lower())
-    slug = re.sub(r"_+", "_", slug).strip("_")
-    return slug or "unknown"
+from .models import BeAlertLocationSensorConfig, _slug
 
 
 async def _async_cleanup_stale_entities(
@@ -218,32 +207,11 @@ class BeAlertAllSensor(BeAlertDevice, SensorEntity):
 # ------------------- Per-location sensor (zone/device) -------------------
 
 
-class BeAlertLocationSensorConfig:
-    """Configuration for a location-based sensor."""
-
-    def __init__(
-        self,
-        hass: HomeAssistant,
-        fetcher: BeAlertFetcher,
-        coordinator: DataUpdateCoordinator,
-        source_entity_id: str,
-        name: str,
-        unique_id: str,
-        entry_id: str,
-    ):
-        """Initialize the location sensor config."""
-        self.hass = hass
-        self.fetcher = fetcher
-        self.coordinator = coordinator
-        self.source_entity_id = source_entity_id
-        self.name = name
-        self.unique_id = unique_id
-        self.entry_id = entry_id
-
-
 class BeAlertLocationEntity(CoordinatorEntity):
     """Sensor showing number of alerts that affect the configured
     zone/device."""
+
+    _attr_has_entity_name = True
 
     def __init__(
         self,
@@ -251,12 +219,9 @@ class BeAlertLocationEntity(CoordinatorEntity):
         name: str | None = None,
         unique_id: str | None = None,
     ):
-        """Initialize the location entity."""
+        """Initialize the location entity."""  # noqa: R0913
         super().__init__(config.coordinator)
-        self.hass = config.hass
-        self._fetcher = config.fetcher
-        self._source_entity = config.source_entity_id
-        self._name = name or config.name  # Store name for logging
+        self.config = config
 
         self._attr_name = name or config.name
         self._attr_unique_id = unique_id or config.unique_id
@@ -264,7 +229,7 @@ class BeAlertLocationEntity(CoordinatorEntity):
         # Create a new device for each tracked location, linked to the main
         # integration device
         slug = _slug(config.source_entity_id)
-        state = self.hass.states.get(config.source_entity_id)
+        state = self.config.hass.states.get(config.source_entity_id)
         device_name = state.name if state else config.source_entity_id
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, slug)},
@@ -283,7 +248,7 @@ class BeAlertLocationEntity(CoordinatorEntity):
     @property
     def extra_state_attributes(self):
         """Return the state attributes."""
-        attrs: dict[str, Any] = {"source": self._source_entity}
+        attrs: dict[str, Any] = {"source": self.config.source_entity_id}
         if self._matches:
             attrs["alerts"] = [
                 {
@@ -311,16 +276,17 @@ class BeAlertLocationEntity(CoordinatorEntity):
 
     def _update_location(self) -> None:
         """Fetch the latest coordinates from the source entity."""
-        coords = _get_coordinates(self.hass, self._source_entity)
+        coords = _get_coordinates(
+            self.config.hass, self.config.source_entity_id
+        )
         if coords:
             self._lat, self._lon = coords
             self._source_has_coords = True
         else:
             self._source_has_coords = False
             _LOGGER.debug(
-                "Could not get coordinates for %s, location sensor "
-                "unavailable.",
-                self._source_entity,
+                "Could not get coordinates for %s, location sensor unavailable.",
+                self.config.source_entity_id,
             )
 
     def _handle_coordinator_update(self) -> None:
@@ -329,14 +295,14 @@ class BeAlertLocationEntity(CoordinatorEntity):
         self._update_location()
         # Then, find alerts for that location if source is available
         if self._source_has_coords:
-            self._matches = self._fetcher.alerts_affecting_point(
+            self._matches = self.config.fetcher.alerts_affecting_point(
                 self._lon, self._lat
             )
         else:
             self._matches = []
         _LOGGER.debug(
-            "BE Alert: %s found %d active alerts (available=%s)",
-            self._name,
+            "BE Alert: %s found %d active alerts (available=%s)",  # type: ignore
+            self.name,
             len(self._matches),
             self._source_has_coords,
         )

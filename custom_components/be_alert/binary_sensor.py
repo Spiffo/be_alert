@@ -13,12 +13,11 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_ENTITY_ID
 
 from .const import DOMAIN, LOCATION_SOURCE_DEVICE, LOCATION_SOURCE_ZONE
-from .sensor import (
-    BeAlertLocationEntity,
+from .models import (
     BeAlertLocationSensorConfig,
     _slug,
-    BeAlertLocationSensor,
 )
+from .sensor import BeAlertLocationEntity, BeAlertLocationSensor
 
 _LOGGER = logging.getLogger(__name__)
 

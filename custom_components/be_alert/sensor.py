@@ -213,6 +213,8 @@ class BeAlertLocationEntity(CoordinatorEntity):
     """Sensor showing number of alerts that affect the configured
     zone/device."""
 
+    _attr_has_entity_name = True
+
     def __init__(
         self,
         config: BeAlertLocationSensorConfig,
@@ -220,11 +222,23 @@ class BeAlertLocationEntity(CoordinatorEntity):
         unique_id: str | None = None,
     ):
         """Initialize the location entity."""  # noqa: R0913
-        # All entities are attached to the main integration device
-        super().__init__(config.coordinator, config.entry_id)
+        super().__init__(config.coordinator)
         self.config = config
         self._attr_name = name or config.name
         self._attr_unique_id = unique_id or config.unique_id
+
+        # Create a new device for each tracked location, linked to the main
+        # integration device
+        slug = _slug(config.source_entity_id)
+        state = self.config.hass.states.get(config.source_entity_id)
+        device_name = state.name if state else config.source_entity_id
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, slug)},
+            name=device_name,
+            manufacturer="BE-Alert",
+            model=f"Tracked {config.source_entity_id.split('.', 1)[0]}",
+            via_device=(DOMAIN, config.entry_id),
+        )
 
         # These will be populated during the update
         self._lat: float | None = None
@@ -302,11 +316,7 @@ class BeAlertLocationSensor(BeAlertLocationEntity, SensorEntity):
 
     def __init__(self, config: BeAlertLocationSensorConfig):
         """Initialize the location sensor."""
-        state = config.hass.states.get(config.source_entity_id)
-        friendly_name = (
-            state.name if state and state.name else config.source_entity_id
-        )
-        super().__init__(config, f"BE Alert {friendly_name}", config.unique_id)
+        super().__init__(config, config.name, config.unique_id)
 
     @property
     def native_value(self):

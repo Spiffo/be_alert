@@ -34,13 +34,19 @@ def _create_location_entities(
     if not entity_id:
         return []
 
+    state = hass.states.get(entity_id)
+    friendly_name = (
+        state.name if state and state.name else entity_id.split(".")[-1]
+    )
+
+    sensor_name = f"BE Alert {friendly_name}"
     sensor_unique_id = f"be_alert_{_slug(entity_id)}"
     config = BeAlertLocationSensorConfig(
         hass,
         fetcher,
         coordinator,
         entity_id,
-        "Alerts",  # The entity name, device name will be prepended
+        sensor_name,
         sensor_unique_id,
         entry.entry_id,
     )

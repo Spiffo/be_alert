@@ -9,8 +9,8 @@ LOCATION_SOURCE_ZONE = "zone"
 
 DEFAULT_SCAN_INTERVAL = 5  # Default polling interval in minutes
 
-FEED_URL = "https://publicalerts.be/CapGateway/feed"
-FEED_PARAMS = (
+FEED_URL = (
+    "https://publicalerts.be/CapGateway/feed?"
     "capCategory=Geo,Met,Safety,Security,Rescue,Fire,Health,Env,Transport,"
     "Infra,CBRNE,Other&outdated=false"
 )

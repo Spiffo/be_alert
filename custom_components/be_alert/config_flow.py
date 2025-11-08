@@ -27,7 +27,7 @@ class BEAlertConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
 
     @staticmethod
-    def is_matching(_source: Any) -> bool:
+    def is_matching(_source: Any) -> bool:  # pylint: disable=arguments-differ
         """Return if the source is matching."""
         return False
 

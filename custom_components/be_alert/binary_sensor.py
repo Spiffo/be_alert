@@ -31,7 +31,7 @@ def _create_location_entities(
     sensor_config: dict[str, Any],
 ) -> list[BeAlertLocationEntity]:
     """Create location-based sensor and binary_sensor entities."""
-    entities = []
+    entities: list[BeAlertLocationEntity] = []
     entity_id = sensor_config.get(CONF_ENTITY_ID)
     if not entity_id:
         return []
@@ -72,18 +72,24 @@ async def async_setup_entry(
     entry_data = hass.data[DOMAIN][entry.entry_id]
     coordinator = entry_data["coordinator"]
     fetcher = entry_data["fetcher"]
-    entities_to_add = []
+    entities_to_add: list[BinarySensorEntity] = []
 
     configured_sensors = entry.options.get("sensors", [])
     for sensor_config in configured_sensors:
         sensor_type = sensor_config.get("type")
 
         if sensor_type in (LOCATION_SOURCE_DEVICE, LOCATION_SOURCE_ZONE):
-            entities_to_add.extend(
-                _create_location_entities(
-                    hass, entry, coordinator, fetcher, sensor_config
-                )
+            # _create_location_entities returns both sensor and binary_sensor
+            # Filter for BinarySensorEntity here.
+            location_entities = _create_location_entities(
+                hass, entry, coordinator, fetcher, sensor_config
             )
+            binary_sensor_entities = [
+                e
+                for e in location_entities
+                if isinstance(e, BinarySensorEntity)
+            ]
+            entities_to_add.extend(binary_sensor_entities)
 
     async_add_entities(entities_to_add, True)
 

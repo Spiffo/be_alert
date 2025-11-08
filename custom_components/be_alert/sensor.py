@@ -88,11 +88,15 @@ def _create_entities_from_config(
             )
 
         elif sensor_type in (LOCATION_SOURCE_DEVICE, LOCATION_SOURCE_ZONE):
-            entities_to_add.extend(
-                _create_location_entities(
-                    hass, entry, coordinator, fetcher, sensor_config
-                )
+            # _create_location_entities returns both sensor and binary_sensor
+            # Filter for SensorEntity here.
+            location_entities = _create_location_entities(
+                hass, entry, coordinator, fetcher, sensor_config
             )
+            sensor_entities = [
+                e for e in location_entities if isinstance(e, SensorEntity)
+            ]
+            entities_to_add.extend(sensor_entities)
 
     return entities_to_add
 
@@ -217,13 +221,24 @@ class BeAlertAllSensor(BeAlertDevice, SensorEntity):
 class BeAlertLocationSensorConfig:
     """Configuration for a location-based sensor."""
 
-    hass: HomeAssistant
-    fetcher: BeAlertFetcher
-    coordinator: DataUpdateCoordinator
-    source_entity_id: str
-    name: str
-    unique_id: str
-    entry_id: str
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        fetcher: BeAlertFetcher,
+        coordinator: DataUpdateCoordinator,
+        source_entity_id: str,
+        name: str,
+        unique_id: str,
+        entry_id: str,
+    ):
+        """Initialize the location sensor config."""
+        self.hass = hass
+        self.fetcher = fetcher
+        self.coordinator = coordinator
+        self.source_entity_id = source_entity_id
+        self.name = name
+        self.unique_id = unique_id
+        self.entry_id = entry_id
 
 
 class BeAlertLocationEntity(CoordinatorEntity):

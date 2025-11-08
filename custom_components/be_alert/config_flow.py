@@ -27,7 +27,7 @@ class BEAlertConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
 
     @staticmethod
-    def is_matching(source: str) -> bool:
+    def is_matching(source: Any) -> bool:
         """Return if the source is matching."""
         return False
 
@@ -180,7 +180,8 @@ class BEAlertOptionsFlow(config_entries.OptionsFlow):
                 if lat is not None and lon is not None:
                     eligible_entities.append(state.entity_id)
 
-            # Add device_tracker entities that have a GPS source and a location
+            # Add device_tracker entities that have a GPS source and a
+            # location
             for state in self.hass.states.async_all("device_tracker"):
                 attributes = state.attributes
                 lat = attributes.get("latitude")
@@ -217,8 +218,8 @@ class BEAlertOptionsFlow(config_entries.OptionsFlow):
                 )
                 new_options = {**options, "sensors": sensors}
                 _LOGGER.warning(
-                    "OptionsFlow.async_step_select_entity: Adding sensor. New "
-                    "options: %s",
+                    "OptionsFlow.async_step_select_entity: Adding sensor. "
+                    "New options: %s",
                     new_options,
                 )
                 return self.async_create_entry(title="", data=new_options)

@@ -27,5 +27,3 @@ TO DO / TO FIX:
 # DONE: check if unloading a sensor actually happens
 
 # TODO: Can you help me create a `hacs.json` file for this integration?
-
-# TODO: deleting sensors does not delete device

@@ -8,7 +8,7 @@ from homeassistant.components.sensor import SensorEntity
 from homeassistant.helpers.entity_registry import (
     async_get as async_get_entity_registry,
 )
-from homeassistant.helpers.device_registry import DeviceInfo
+from homeassistant.helpers.device_registry import DeviceInfo, DeviceEntryType
 from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator,
     CoordinatorEntity,
@@ -43,7 +43,7 @@ async def async_setup_entry(
     entry_data = hass.data[DOMAIN][entry.entry_id]
     coordinator = entry_data["coordinator"]
     fetcher = entry_data["fetcher"]
-    entities_to_add = []
+    entities_to_add: list[SensorEntity] = []
 
     # Get the list of configured sensors from the options
     configured_sensors = entry.options.get("sensors", [])
@@ -178,7 +178,7 @@ class BeAlertDevice(CoordinatorEntity):
             name="BE Alert",
             manufacturer="BE-Alert",
             model="Alert Feed",
-            entry_type="service",
+            entry_type=DeviceEntryType.SERVICE,
         )
 
 
@@ -203,7 +203,7 @@ class BeAlertAllSensor(BeAlertDevice, SensorEntity):
         return "be_alert_all"
 
     @property
-    def state(self):
+    def native_value(self):
         return len(self._fetcher.alerts)
 
     @property
@@ -357,6 +357,6 @@ class BeAlertLocationSensor(BeAlertLocationEntity, SensorEntity):
         self._attr_unique_id = unique_id
 
     @property
-    def state(self):
+    def native_value(self):
         """Return the number of active alerts for the location."""
         return len(self._matches)

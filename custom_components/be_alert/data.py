@@ -28,7 +28,9 @@ class BeAlertFetcher:
         self.last_checked = ha_dt.now().isoformat()
 
         try:
-            async with self._session.get(FEED_URL, timeout=15) as resp:
+            async with self._session.get(
+                FEED_URL, timeout=aiohttp.ClientTimeout(total=15)
+            ) as resp:
                 data = await resp.json()
         except Exception as err:
             _LOGGER.error("BeAlertFetcher.async_update: fetch failed: %s", err)

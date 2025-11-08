@@ -26,8 +26,8 @@ class BEAlertConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     VERSION = 1
 
-    @staticmethod
-    def is_matching(_source: Any) -> bool:
+    @classmethod
+    def is_matching(cls, _source: Any) -> bool:
         """Return if the source is matching."""
         return False
 
@@ -139,11 +139,11 @@ class BEAlertOptionsFlow(config_entries.OptionsFlow):
                 "OptionsFlow.async_step_add_sensor: User selected: %s",
                 sensor_type,
             )
-            if sensor_type == "all":  # type: ignore
+            if sensor_type == "all":
                 # Handle 'all' sensor immediately
                 sensors = list(options.get("sensors", []))
                 if "all" not in [s.get("type") for s in sensors]:
-                    sensors.append({"type": "all"})  # type: ignore
+                    sensors.append({"type": "all"})
                     new_options = {**options, "sensors": sensors}
                     _LOGGER.warning(
                         "OptionsFlow.async_step_add_sensor: Adding 'all' "

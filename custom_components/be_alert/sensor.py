@@ -16,7 +16,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.const import CONF_ENTITY_ID
 
 from .const import DOMAIN, LOCATION_SOURCE_DEVICE, LOCATION_SOURCE_ZONE
-from .binary_sensor import _create_location_entities
+from .entity_helpers import _create_location_entities
 from .data import BeAlertFetcher
 from .models import BeAlertLocationSensorConfig, _slug
 
@@ -222,11 +222,12 @@ class BeAlertLocationEntity(CoordinatorEntity):
         unique_id: str | None = None,
     ):
         """Initialize the location entity."""  # noqa: R0913
-        super().__init__(config.coordinator)
+        super().__init__(
+            config.coordinator,
+            name=name or config.name,
+            unique_id=unique_id or config.unique_id,
+        )
         self.config = config
-
-        self._attr_name = name or config.name
-        self._attr_unique_id = unique_id or config.unique_id
 
         # Create a new device for each tracked location, linked to the main
         # integration device

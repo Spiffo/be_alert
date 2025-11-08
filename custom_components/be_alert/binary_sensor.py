@@ -13,48 +13,11 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_ENTITY_ID
 
 from .const import DOMAIN, LOCATION_SOURCE_DEVICE, LOCATION_SOURCE_ZONE
-from .models import (
-    BeAlertLocationSensorConfig,
-    _slug,
-)
-from .sensor import BeAlertLocationEntity, BeAlertLocationSensor
+from .models import BeAlertLocationSensorConfig
+from .sensor import BeAlertLocationEntity
+from .entity_helpers import _create_location_entities
 
 _LOGGER = logging.getLogger(__name__)
-
-
-def _create_location_entities(
-    hass: HomeAssistant,
-    entry: ConfigEntry,
-    coordinator,
-    fetcher,
-    sensor_config: dict[str, Any],
-) -> list[BeAlertLocationEntity]:
-    """Create location-based sensor and binary_sensor entities."""
-    entities: list[BeAlertLocationEntity] = []
-    entity_id = sensor_config.get(CONF_ENTITY_ID)
-    if not entity_id:
-        return []
-
-    state = hass.states.get(entity_id)
-    friendly_name = (
-        state.name if state and state.name else entity_id.split(".")[-1]
-    )
-
-    # Create config for the sensor
-    sensor_name = f"BE Alert {friendly_name}"
-    sensor_unique_id = f"be_alert_{_slug(entity_id)}"
-    config = BeAlertLocationSensorConfig(
-        hass=hass,
-        fetcher=fetcher,
-        coordinator=coordinator,
-        source_entity_id=entity_id,
-        name=sensor_name,
-        unique_id=sensor_unique_id,
-        entry_id=entry.entry_id,
-    )
-    entities.append(BeAlertLocationSensor(config))
-    entities.append(BeAlertLocationBinarySensor(config))
-    return entities
 
 
 async def async_setup_entry(

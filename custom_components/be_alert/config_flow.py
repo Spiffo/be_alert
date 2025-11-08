@@ -122,7 +122,7 @@ class BEAlertOptionsFlow(config_entries.OptionsFlow):
                 sensors = list(options.get("sensors", []))
                 if "all" not in [s.get("type") for s in sensors]:
                     sensors.append({"type": "all"})  # type: ignore
-                    new_options = {**options, "sensors": sensors}  # type: ignore
+                    new_options = {**options, "sensors": sensors}
                     _LOGGER.warning(
                         "OptionsFlow.async_step_add_sensor: Adding 'all' "
                         "sensor. New options: %s",

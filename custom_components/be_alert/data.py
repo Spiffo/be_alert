@@ -42,16 +42,19 @@ class BeAlertFetcher:
                 for coordset in area.get("coordinates", []):
                     if coordset.get("type") == "LineString":  # type: ignore
                         points = [
-                            (p["x"], p["y"]) for p in
-                            coordset.get("coordinates", [])]
+                            (p["x"], p["y"])
+                            for p in coordset.get("coordinates", [])
+                        ]
                         if len(points) >= 3:
                             try:
                                 polygons.append(
-                                    shapely.geometry.Polygon(points))
+                                    shapely.geometry.Polygon(points)
+                                )
                             except Exception:
                                 _LOGGER.warning(
                                     "BeAlertFetcher: invalid polygon points, "
-                                    "skipping", exc_info=True
+                                    "skipping",
+                                    exc_info=True,
                                 )
             alerts.append(
                 {
@@ -68,11 +71,11 @@ class BeAlertFetcher:
         self.alerts = alerts
         _LOGGER.warning(
             "BeAlertFetcher.async_update: finished fetch, %d alerts parsed",
-            len(self.alerts)
+            len(self.alerts),
         )
 
     def alerts_affecting_point(
-            self, lon: float | None, lat: float | None
+        self, lon: float | None, lat: float | None
     ) -> list[dict]:
         """Return list of alerts whose polygons contain the given point."""
         if lat is None or lon is None:
@@ -88,6 +91,6 @@ class BeAlertFetcher:
                 except Exception:
                     _LOGGER.warning(
                         "BeAlertFetcher: polygon contains() failed",
-                        exc_info=True
+                        exc_info=True,
                     )
         return matches

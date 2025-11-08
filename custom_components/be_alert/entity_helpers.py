@@ -22,10 +22,6 @@ def _create_location_entities(
     sensor_config: dict[str, Any],
 ) -> list["BeAlertLocationEntity"]:
     """Create location-based sensor and binary_sensor entities."""
-    # Defer imports to prevent circular dependencies
-    from .sensor import BeAlertLocationSensor, BeAlertLocationEntity
-    from .binary_sensor import BeAlertLocationBinarySensor
-
     entities: list[BeAlertLocationEntity] = []
     entity_id = sensor_config.get(CONF_ENTITY_ID)
     if not entity_id:

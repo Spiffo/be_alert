@@ -232,7 +232,7 @@ class BeAlertLocationEntity(CoordinatorEntity):
         slug = _slug(config.source_entity_id)
         state = self.config.hass.states.get(config.source_entity_id)
         device_name = state.name if state else config.source_entity_id
-        self._attr_device_info = DeviceInfo(
+        self._attr_device_info = DeviceInfo(  # type: ignore
             identifiers={(DOMAIN, slug)},
             name=device_name,
             manufacturer="BE-Alert",
@@ -316,7 +316,7 @@ class BeAlertLocationSensor(BeAlertLocationEntity, SensorEntity):
 
     def __init__(self, config: BeAlertLocationSensorConfig):
         """Initialize the location sensor."""
-        super().__init__(config, config.name, config.unique_id)
+        super().__init__(config, "Alerts", config.unique_id)
 
     @property
     def native_value(self):

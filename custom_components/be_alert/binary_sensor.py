@@ -1,4 +1,5 @@
 """BE Alert binary sensor platform."""
+
 import logging
 
 from homeassistant.components.binary_sensor import (
@@ -24,7 +25,8 @@ async def async_setup_entry(
     """Set up BE Alert binary sensors from a config entry."""
     _LOGGER.warning(
         "binary_sensor.async_setup_entry: Started for entry %s.",
-        entry.entry_id)
+        entry.entry_id,
+    )
 
     entry_data = hass.data[DOMAIN][entry.entry_id]
     coordinator = entry_data["coordinator"]
@@ -51,12 +53,19 @@ async def async_setup_entry(
             _LOGGER.warning(
                 "binary_sensor.async_setup_entry: Preparing location "
                 "binary_sensor. Name: '%s', Unique ID: '%s'",
-                sensor_name, sensor_unique_id
+                sensor_name,
+                sensor_unique_id,
             )
             entities_to_add.append(
                 BeAlertLocationBinarySensor(
-                    hass, fetcher, coordinator, entity_id, sensor_name,
-                    sensor_unique_id, entry.entry_id)
+                    hass,
+                    fetcher,
+                    coordinator,
+                    entity_id,
+                    sensor_name,
+                    sensor_unique_id,
+                    entry.entry_id,
+                )
             )
 
     async_add_entities(entities_to_add, True)
@@ -77,8 +86,15 @@ class BeAlertLocationBinarySensor(BeAlertLocationEntity, BinarySensorEntity):
         unique_id: str,
         entry_id: str,
     ):
-        super().__init__(hass, fetcher, coordinator, source_entity_id, name,
-                         unique_id, entry_id)
+        super().__init__(
+            hass,
+            fetcher,
+            coordinator,
+            source_entity_id,
+            name,
+            unique_id,
+            entry_id,
+        )
         self._attr_name = name
         self._attr_unique_id = unique_id
 

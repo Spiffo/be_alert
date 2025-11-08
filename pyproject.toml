@@ -1,0 +1,6 @@
+[tool.ruff]
+line-length = 79
+
+[tool.ruff.lint]
+# Enable flake8-E501 rule for line length
+select = ["E501"]

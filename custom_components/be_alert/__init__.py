@@ -1,4 +1,5 @@
 """Init for BE Alert integration."""
+
 import logging
 from datetime import timedelta
 
@@ -26,13 +27,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up BE Alert from a config entry."""
     _LOGGER.warning(
         "__init__.async_setup_entry: Setting up entry %s with options: %s",
-        entry.entry_id, entry.options
+        entry.entry_id,
+        entry.options,
     )
 
     hass.data.setdefault(DOMAIN, {})
 
     # Create a new coordinator for this config entry.
-    # This ensures that on every reload, we get a fresh coordinator with the correct settings.
+    # This ensures that on every reload, we get a fresh coordinator with the
+    # correct settings.
     from .data import BeAlertFetcher
 
     session = async_get_clientsession(hass)
@@ -41,7 +44,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     scan_interval = entry.options.get("scan_interval", DEFAULT_SCAN_INTERVAL)
     _LOGGER.warning(
         "__init__.async_setup_entry: Using scan_interval of %s minutes.",
-        scan_interval)
+        scan_interval,
+    )
     coordinator = DataUpdateCoordinator(
         hass,
         _LOGGER,
@@ -55,10 +59,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     )
 
     # Store the coordinator and fetcher scoped to this config entry
-    hass.data[DOMAIN][entry.entry_id] = {"coordinator": coordinator, "fetcher": fetcher}
+    hass.data[DOMAIN][entry.entry_id] = {
+        "coordinator": coordinator,
+        "fetcher": fetcher,
+    }
 
     # Register the update service if it doesn't exist yet
     if not hass.services.has_service(DOMAIN, "update"):
+
         async def async_update_service(service_call):
             """Handle the service call to update all BE Alert coordinators."""
             _LOGGER.info(
@@ -66,6 +74,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             )
             for entry_data in hass.data[DOMAIN].values():
                 await entry_data["coordinator"].async_request_refresh()
+
         hass.services.async_register(DOMAIN, "update", async_update_service)
 
     # Listen for option changes
@@ -77,7 +86,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         "binary_sensor platforms."
     )
     await hass.config_entries.async_forward_entry_setups(
-        entry, ["sensor", "binary_sensor"])
+        entry, ["sensor", "binary_sensor"]
+    )
 
     return True
 
@@ -85,8 +95,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 async def async_update_options(hass: HomeAssistant, entry: ConfigEntry):
     """Handle options update."""
     _LOGGER.warning(
-        "__init__.async_update_options: Options updated, reloading "
-        "integration."
+        "__init__.async_update_options: Options updated, reloading integr."
     )
     await hass.config_entries.async_reload(entry.entry_id)
 
@@ -96,7 +105,8 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     _LOGGER.warning(f"Unloading BE Alert entry {entry.entry_id}")
     platforms = ["sensor", "binary_sensor"]
     unload_ok = await hass.config_entries.async_unload_platforms(
-        entry, platforms)
+        entry, platforms
+    )
 
     if unload_ok:
         hass.data[DOMAIN].pop(entry.entry_id)

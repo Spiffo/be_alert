@@ -1,14 +1,18 @@
 """BE Alert sensor platform."""
+
 import logging
 from typing import Any
 import re
 
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.helpers.entity_registry import (
-    async_get as async_get_entity_registry)
+    async_get as async_get_entity_registry,
+)
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.update_coordinator import (
-    DataUpdateCoordinator, CoordinatorEntity)
+    DataUpdateCoordinator,
+    CoordinatorEntity,
+)
 from homeassistant.core import HomeAssistant
 from homeassistant.const import CONF_ENTITY_ID
 
@@ -28,11 +32,12 @@ def _slug(name: str) -> str:
 
 
 async def async_setup_entry(
-        hass: HomeAssistant, entry, async_add_entities, discovery_info=None):
+    hass: HomeAssistant, entry, async_add_entities, discovery_info=None
+):
     """Set up BE Alert sensors from a config entry."""
     _LOGGER.warning(
-        "sensor.async_setup_entry: Started for entry %s.",
-        entry.entry_id)
+        "sensor.async_setup_entry: Started for entry %s.", entry.entry_id
+    )
 
     # The coordinator is set up in __init__.py, so we just retrieve it.
     entry_data = hass.data[DOMAIN][entry.entry_id]
@@ -44,7 +49,9 @@ async def async_setup_entry(
     configured_sensors = entry.options.get("sensors", [])
     _LOGGER.warning(
         "sensor.async_setup_entry: Found %d sensor configurations in "
-        "options: %s", len(configured_sensors), configured_sensors
+        "options: %s",
+        len(configured_sensors),
+        configured_sensors,
     )
 
     # Proactively remove stale entities from the registry for this entry
@@ -71,33 +78,41 @@ async def async_setup_entry(
             if ent.unique_id not in desired_unique_ids:
                 _LOGGER.debug(
                     "sensor.async_setup_entry: Removing stale entity %s "
-                    "(unique_id=%s)", ent.entity_id, ent.unique_id
+                    "(unique_id=%s)",
+                    ent.entity_id,
+                    ent.unique_id,
                 )
                 registry.async_remove(ent.entity_id)
     except Exception as err:
         _LOGGER.debug(
             "sensor.async_setup_entry: Failed to cleanup stale entities: %s",
-            err)
+            err,
+        )
 
     for sensor_config in configured_sensors:
         sensor_type = sensor_config.get("type")
         _LOGGER.warning(
             "sensor.async_setup_entry: Processing sensor config: %s",
-            sensor_config)
+            sensor_config,
+        )
 
         if sensor_type == "all":
             # Create the "All" sensor if not already present
             # The unique_id for the "All" sensor is 'be_alert_all'
-            _LOGGER.warning("sensor.async_setup_entry: Preparing 'all' sensor.")
+            _LOGGER.warning(
+                "sensor.async_setup_entry: Preparing the 'all' sensor."
+            )
             entities_to_add.append(
-                BeAlertAllSensor(fetcher, coordinator, entry.entry_id))
+                BeAlertAllSensor(fetcher, coordinator, entry.entry_id)
+            )
 
         elif sensor_type in (LOCATION_SOURCE_DEVICE, LOCATION_SOURCE_ZONE):
             entity_id = sensor_config.get(CONF_ENTITY_ID)
             if not entity_id:
                 _LOGGER.warning(
                     "sensor.async_setup_entry: Skipping location sensor with "
-                    "no entity_id: %s", sensor_config
+                    "no entity_id: %s",
+                    sensor_config,
                 )
                 continue
 
@@ -110,17 +125,28 @@ async def async_setup_entry(
             sensor_unique_id = f"be_alert_{_slug(entity_id)}"
             _LOGGER.warning(
                 "sensor.async_setup_entry: Preparing location sensor. Name: "
-                "'%s', Unique ID: '%s' for entry %s", sensor_name,
-                sensor_unique_id, entry.entry_id
+                "'%s', Unique ID: '%s' for entry %s",
+                sensor_name,
+                sensor_unique_id,
+                entry.entry_id,
             )
-            entities_to_add.append(BeAlertLocationSensor(
-                hass, fetcher, coordinator, entity_id, sensor_name,
-                sensor_unique_id, entry.entry_id))
+            entities_to_add.append(
+                BeAlertLocationSensor(
+                    hass,
+                    fetcher,
+                    coordinator,
+                    entity_id,
+                    sensor_name,
+                    sensor_unique_id,
+                    entry.entry_id,
+                )
+            )
 
     if entities_to_add:
         _LOGGER.warning(
             "sensor.async_setup_entry: Calling async_add_entities with %d "
-            "entities.", len(entities_to_add)
+            "entities.",
+            len(entities_to_add),
         )
         async_add_entities(entities_to_add, True)
     else:
@@ -128,7 +154,7 @@ async def async_setup_entry(
 
 
 def _get_coordinates(hass: HomeAssistant, entity_id: str):
-    """Get latitude and longitude for zone or device entity_id synchronously."""
+    """Get lat and long for zone or device entity_id synchronously."""
     if not entity_id:
         return None
     state = hass.states.get(entity_id)
@@ -141,8 +167,10 @@ def _get_coordinates(hass: HomeAssistant, entity_id: str):
 
 # ------------------- Global sensor (all alerts) -------------------
 
+
 class BeAlertDevice(CoordinatorEntity):
     """Base class for BE Alert entities linked to the main device."""
+
     def __init__(self, coordinator: DataUpdateCoordinator, entry_id: str):
         super().__init__(coordinator)
         self._attr_device_info = DeviceInfo(
@@ -158,14 +186,18 @@ class BeAlertAllSensor(BeAlertDevice, SensorEntity):
     """Sensor showing total number of active alerts and full list."""
 
     def __init__(
-            self, fetcher: BeAlertFetcher, coordinator: DataUpdateCoordinator,
-            entry_id: str):
+        self,
+        fetcher: BeAlertFetcher,
+        coordinator: DataUpdateCoordinator,
+        entry_id: str,
+    ):
         super().__init__(coordinator, entry_id)
         self._fetcher = fetcher
 
     @property
     def name(self) -> str:
         return "BE Alert All"
+
     @property
     def unique_id(self):
         return "be_alert_all"
@@ -196,8 +228,10 @@ class BeAlertAllSensor(BeAlertDevice, SensorEntity):
 
 # ------------------- Per-location sensor (zone/device) -------------------
 
+
 class BeAlertLocationEntity(CoordinatorEntity):
-    """Sensor showing number of alerts that affect the configured zone/device."""
+    """Sensor showing number of alerts that affect the configured
+    zone/device."""
 
     def __init__(
         self,
@@ -272,7 +306,8 @@ class BeAlertLocationEntity(CoordinatorEntity):
             self._source_has_coords = False
             _LOGGER.debug(
                 "Could not get coordinates for %s, location sensor "
-                "unavailable.", self._source_entity
+                "unavailable.",
+                self._source_entity,
             )
 
     def _handle_coordinator_update(self) -> None:
@@ -288,13 +323,16 @@ class BeAlertLocationEntity(CoordinatorEntity):
             self._matches = []
         _LOGGER.debug(
             "BE Alert: %s found %d active alerts (available=%s)",
-            self._name, len(self._matches), self._source_has_coords
+            self._name,
+            len(self._matches),
+            self._source_has_coords,
         )
         self.async_write_ha_state()
 
 
 class BeAlertLocationSensor(BeAlertLocationEntity, SensorEntity):
-    """Sensor showing number of alerts that affect the configured zone/device."""
+    """Sensor showing number of alerts that affect the
+    configured zone/device."""
 
     def __init__(
         self,
@@ -307,8 +345,14 @@ class BeAlertLocationSensor(BeAlertLocationEntity, SensorEntity):
         entry_id: str,
     ):
         super().__init__(
-            hass, fetcher, coordinator, source_entity_id, name,
-            unique_id, entry_id)
+            hass,
+            fetcher,
+            coordinator,
+            source_entity_id,
+            name,
+            unique_id,
+            entry_id,
+        )
         self._attr_name = name
         self._attr_unique_id = unique_id
 

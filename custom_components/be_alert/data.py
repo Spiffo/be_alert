@@ -11,7 +11,7 @@ import shapely.errors
 
 from homeassistant.util import dt as ha_dt
 
-from .const import FEED_URL
+from .const import FEED_URL, FEED_PARAMS
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -60,7 +60,8 @@ class BeAlertFetcher:
 
         try:
             async with self._session.get(
-                FEED_URL, timeout=aiohttp.ClientTimeout(total=15)
+                f"{FEED_URL}?{FEED_PARAMS}",
+                timeout=aiohttp.ClientTimeout(total=15),
             ) as resp:
                 resp.raise_for_status()
                 data = await resp.json()

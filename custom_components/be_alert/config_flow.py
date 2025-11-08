@@ -26,6 +26,11 @@ class BEAlertConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     VERSION = 1
 
+    @staticmethod
+    def is_matching(_source: str) -> bool:
+        """Return if the source is matching."""
+        return False
+
     async def async_step_user(self, user_input: dict[str, Any] | None = None):
         """Handle the initial user setup step.
 
@@ -55,9 +60,9 @@ class BEAlertConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     @staticmethod
     @callback
     # pylint: disable-next=unused-argument
-    def async_get_options_flow(config_entry):
+    def async_get_options_flow(_config_entry):
         """Return options flow handler."""
-        return BEAlertOptionsFlow(config_entry)
+        return BEAlertOptionsFlow(_config_entry)
 
 
 class BEAlertOptionsFlow(config_entries.OptionsFlow):

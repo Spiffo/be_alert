@@ -62,13 +62,7 @@ class BeAlertLocationBinarySensor(BeAlertLocationEntity, BinarySensorEntity):
     def __init__(self, config: BeAlertLocationSensorConfig):
         """Initialize the location binary sensor."""
         # The unique ID and name for the binary sensor are derived from the
-        state = config.hass.states.get(config.source_entity_id)
-        device_name = (
-            state.name if state and state.name else config.source_entity_id
-        )
-        unique_id = f"{config.unique_id}_alerting"
-        super().__init__(config, f"{device_name} Alerting", unique_id)
-        self._attr_object_id = unique_id
+        super().__init__(config, "Alerting", f"{config.unique_id}_alerting")
 
     @property
     def is_on(self) -> bool:

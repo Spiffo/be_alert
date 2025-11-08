@@ -213,6 +213,8 @@ class BeAlertLocationEntity(CoordinatorEntity):
     """Sensor showing number of alerts that affect the configured
     zone/device."""
 
+    _attr_has_entity_name = True
+
     def __init__(
         self,
         config: BeAlertLocationSensorConfig,
@@ -314,12 +316,7 @@ class BeAlertLocationSensor(BeAlertLocationEntity, SensorEntity):
 
     def __init__(self, config: BeAlertLocationSensorConfig):
         """Initialize the location sensor."""
-        state = config.hass.states.get(config.source_entity_id)
-        device_name = (
-            state.name if state and state.name else config.source_entity_id
-        )
-        super().__init__(config, f"{device_name} Alerts", config.unique_id)
-        self._attr_object_id = config.unique_id
+        super().__init__(config, "Alerts", config.unique_id)
 
     @property
     def native_value(self):

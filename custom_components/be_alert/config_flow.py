@@ -243,7 +243,7 @@ class BEAlertOptionsFlow(config_entries.OptionsFlow):
                     selector_cfg
                 )
             }
-        )  # noqa: E501
+        )
         return self.async_show_form(
             step_id="select_entity", data_schema=schema, errors=errors
         )
@@ -268,7 +268,7 @@ class BEAlertOptionsFlow(config_entries.OptionsFlow):
             else:
                 entity_id = sensor[CONF_ENTITY_ID]
                 state = self.hass.states.get(entity_id)
-                name = state.name if state else entity_id  # type: ignore
+                name = state.name if state else entity_id
                 sensor_map[entity_id] = (
                     f"{sensor['type'].capitalize()}: {name}"
                 )

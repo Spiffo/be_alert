@@ -303,7 +303,7 @@ class BeAlertLocationEntity(CoordinatorEntity):
         else:
             self._matches = []
         _LOGGER.debug(
-            "BE Alert: %s found %d active alerts (available=%s)",  # type: ignore
+            "BE Alert: %s found %d active alerts (available=%s)",
             self.name,
             len(self._matches),
             self._source_has_coords,

@@ -25,3 +25,5 @@ TO DO / TO FIX:
 # TODO: before you call the webservice, check if there are any sensors or binary sensors that exist under this integration
 
 # DONE: check if unloading a sensor actually happens
+
+# TODO: Can you help me create a `hacs.json` file for this integration?

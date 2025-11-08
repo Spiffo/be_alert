@@ -1,6 +1,7 @@
 """BE Alert sensor platform."""
 
 import logging
+from typing import Any
 
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.helpers.entity_registry import (
@@ -14,7 +15,7 @@ from homeassistant.helpers.update_coordinator import (
 from homeassistant.core import HomeAssistant
 from homeassistant.const import CONF_ENTITY_ID
 
-from .const import DOMAIN, LOCATION_SOURCE_DEVICE, LOCATION_SOURCE_ZONE, Any
+from .const import DOMAIN, LOCATION_SOURCE_DEVICE, LOCATION_SOURCE_ZONE
 from .binary_sensor import _create_location_entities
 from .data import BeAlertFetcher
 from .models import BeAlertLocationSensorConfig, _slug
@@ -178,11 +179,11 @@ class BeAlertAllSensor(BeAlertDevice, SensorEntity):
         return "BE Alert All"
 
     @property
-    def unique_id(self):
+    def unique_id(self) -> str:
         return "be_alert_all"
 
     @property
-    def native_value(self):
+    def native_value(self) -> int:
         return len(self._fetcher.alerts)
 
     @property

@@ -1,4 +1,3 @@
-# const.py
 """Constants for the BE Alert integration."""
 
 DOMAIN = "be_alert"

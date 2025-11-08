@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from .sensor import BeAlertLocationEntity, BeAlertLocationSensor
     from .binary_sensor import BeAlertLocationBinarySensor
 
-from .const import CONF_ENTITY_ID
+from homeassistant.const import CONF_ENTITY_ID
 from .models import BeAlertLocationSensorConfig, _slug
 
 
@@ -22,6 +22,10 @@ def _create_location_entities(
     sensor_config: dict[str, Any],
 ) -> list["BeAlertLocationEntity"]:
     """Create location-based sensor and binary_sensor entities."""
+    # Defer imports to prevent circular dependencies at runtime
+    from .sensor import BeAlertLocationSensor
+    from .binary_sensor import BeAlertLocationBinarySensor
+
     entities: list[BeAlertLocationEntity] = []
     entity_id = sensor_config.get(CONF_ENTITY_ID)
     if not entity_id:

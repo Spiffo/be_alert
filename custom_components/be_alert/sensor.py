@@ -222,12 +222,10 @@ class BeAlertLocationEntity(CoordinatorEntity):
         unique_id: str | None = None,
     ):
         """Initialize the location entity."""  # noqa: R0913
-        super().__init__(
-            config.coordinator,
-            name=name or config.name,
-            unique_id=unique_id or config.unique_id,
-        )
+        super().__init__(config.coordinator)
         self.config = config
+        self._attr_name = name or config.name
+        self._attr_unique_id = unique_id or config.unique_id
 
         # Create a new device for each tracked location, linked to the main
         # integration device

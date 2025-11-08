@@ -14,10 +14,11 @@ _LOGGER = logging.getLogger(__name__)
 _LOGGER.warning("BE Alert __init__.py loaded")
 
 # Define an empty schema because this integration is configured via the UI
+# pylint: disable=invalid-name
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 
-async def async_setup(hass: HomeAssistant, config: dict) -> bool:
+async def async_setup(_hass: HomeAssistant, _config: dict) -> bool:
     """Legacy YAML setup (not used, return True)."""
     _LOGGER.warning("BE Alert async_setup called")
     return True
@@ -36,7 +37,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Create a new coordinator for this config entry.
     # This ensures that on every reload, we get a fresh coordinator with the
     # correct settings.
-    from .data import BeAlertFetcher
+    from .data import BeAlertFetcher  # pylint: disable=import-outside-toplevel
 
     session = async_get_clientsession(hass)
     fetcher = BeAlertFetcher(session)
@@ -67,7 +68,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Register the update service if it doesn't exist yet
     if not hass.services.has_service(DOMAIN, "update"):
 
-        async def async_update_service(service_call):
+        async def async_update_service(_service_call):
             """Handle the service call to update all BE Alert coordinators."""
             _LOGGER.info(
                 "BE Alert update service called, refreshing all coordinators."
@@ -102,7 +103,7 @@ async def async_update_options(hass: HomeAssistant, entry: ConfigEntry):
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a BE Alert config entry."""
-    _LOGGER.warning(f"Unloading BE Alert entry {entry.entry_id}")
+    _LOGGER.warning("Unloading BE Alert entry %s", entry.entry_id)
     platforms = ["sensor", "binary_sensor"]
     unload_ok = await hass.config_entries.async_unload_platforms(
         entry, platforms
@@ -115,6 +116,6 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             hass.services.async_remove(DOMAIN, "update")
             _LOGGER.info("Last BE Alert entry unloaded, removing service.")
     else:
-        _LOGGER.warning(f"Failed to unload entry {entry.entry_id}")
+        _LOGGER.warning("Failed to unload entry %s", entry.entry_id)
 
     return unload_ok

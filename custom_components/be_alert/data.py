@@ -2,16 +2,47 @@
 
 from __future__ import annotations
 
-# from datetime import timedelta
+import asyncio
 import logging
+from typing import Any
 import aiohttp
 import shapely.geometry
+import shapely.errors
 
 from homeassistant.util import dt as ha_dt
 
 from .const import FEED_URL
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def _parse_alert_item(item: dict[str, Any]) -> dict[str, Any]:
+    """Parse a single alert item from the feed into a structured dict."""
+    polygons = []
+    for area in item.get("area", []):
+        for coordset in area.get("coordinates", []):
+            if coordset.get("type") == "LineString":
+                points = [
+                    (p["x"], p["y"]) for p in coordset.get("coordinates", [])
+                ]
+                if len(points) >= 3:
+                    try:
+                        polygons.append(shapely.geometry.Polygon(points))
+                    except (shapely.errors.ShapelyError, ValueError):
+                        _LOGGER.warning(
+                            "BeAlertFetcher: invalid polygon points, skipping",
+                            exc_info=True,
+                        )
+    return {
+        "title": item.get("title"),
+        "link": item.get("link"),
+        "category": item.get("category"),
+        "pubDate": item.get("pubDate"),
+        "startDate": item.get("startDate"),
+        "expirationDate": item.get("expirationDate"),
+        "description": item.get("description"),
+        "polygons": polygons,
+    }
 
 
 class BeAlertFetcher:
@@ -31,46 +62,16 @@ class BeAlertFetcher:
             async with self._session.get(
                 FEED_URL, timeout=aiohttp.ClientTimeout(total=15)
             ) as resp:
+                resp.raise_for_status()
                 data = await resp.json()
-        except Exception as err:
+        except (aiohttp.ClientError, asyncio.TimeoutError) as err:
             _LOGGER.error("BeAlertFetcher.async_update: fetch failed: %s", err)
             self.alerts = []
             return
 
-        alerts: list[dict] = []
-        for item in data.get("items", []):
-            polygons = []
-            for area in item.get("area", []):
-                for coordset in area.get("coordinates", []):
-                    if coordset.get("type") == "LineString":  # type: ignore
-                        points = [
-                            (p["x"], p["y"])
-                            for p in coordset.get("coordinates", [])
-                        ]
-                        if len(points) >= 3:
-                            try:
-                                polygons.append(
-                                    shapely.geometry.Polygon(points)
-                                )
-                            except Exception:
-                                _LOGGER.warning(
-                                    "BeAlertFetcher: invalid polygon points, "
-                                    "skipping",
-                                    exc_info=True,
-                                )
-            alerts.append(
-                {
-                    "title": item.get("title"),
-                    "link": item.get("link"),
-                    "category": item.get("category"),
-                    "pubDate": item.get("pubDate"),
-                    "startDate": item.get("startDate"),
-                    "expirationDate": item.get("expirationDate"),
-                    "description": item.get("description"),
-                    "polygons": polygons,
-                }
-            )
-        self.alerts = alerts
+        self.alerts = [
+            _parse_alert_item(item) for item in data.get("items", [])
+        ]
         _LOGGER.warning(
             "BeAlertFetcher.async_update: finished fetch, %d alerts parsed",
             len(self.alerts),
@@ -90,7 +91,7 @@ class BeAlertFetcher:
                     if poly.contains(point):
                         matches.append(alert)
                         break
-                except Exception:
+                except (shapely.errors.ShapelyError, ValueError):
                     _LOGGER.warning(
                         "BeAlertFetcher: polygon contains() failed",
                         exc_info=True,

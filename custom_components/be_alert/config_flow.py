@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+from typing import Any
 import logging
 import voluptuous as vol
-from typing import Any
 from homeassistant import config_entries
 from homeassistant.const import CONF_ENTITY_ID
 from homeassistant.core import callback
@@ -25,6 +25,11 @@ class BEAlertConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle the multi-step config flow for BE Alert."""
 
     VERSION = 1
+
+    @staticmethod
+    def is_matching(source: str) -> bool:
+        """Return if the source is matching."""
+        return False
 
     async def async_step_user(self, user_input: dict[str, Any] | None = None):
         """Handle the initial setup of the integration hub."""
@@ -65,7 +70,7 @@ class BEAlertOptionsFlow(config_entries.OptionsFlow):
         _LOGGER.warning("OptionsFlow.__init__: Initializing options flow.")
         self._sensor_type: str | None = None
 
-    async def async_step_init(self, user_input=None):
+    async def async_step_init(self, _user_input=None):
         """Show the main menu for the options flow."""
         _LOGGER.warning(
             "OptionsFlow.async_step_init: Showing menu for entry %s.",
@@ -129,12 +134,11 @@ class BEAlertOptionsFlow(config_entries.OptionsFlow):
                         new_options,
                     )
                     return self.async_create_entry(title="", data=new_options)
-                else:
-                    return self.async_abort(reason="all_sensor_exists")
-            else:
-                self._sensor_type = sensor_type
-                # Move to the next step for zone/device
-                return await self.async_step_select_entity()
+                return self.async_abort(reason="all_sensor_exists")
+
+            self._sensor_type = sensor_type
+            # Move to the next step for zone/device
+            return await self.async_step_select_entity()
 
         schema = vol.Schema(
             {
@@ -218,8 +222,8 @@ class BEAlertOptionsFlow(config_entries.OptionsFlow):
                     new_options,
                 )
                 return self.async_create_entry(title="", data=new_options)
-            else:
-                errors["base"] = "entity_already_configured"
+
+            errors["base"] = "entity_already_configured"
 
         schema = vol.Schema(
             {

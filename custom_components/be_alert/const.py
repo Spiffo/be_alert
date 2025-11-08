@@ -1,4 +1,6 @@
 # const.py
+"""Constants for the BE Alert integration."""
+
 DOMAIN = "be_alert"
 CONF_LOCATION_TEXT = "Track Alert at this location:"
 

@@ -1,10 +1,12 @@
 """BE Alert binary sensor platform."""
 
 import logging
+from typing import Any
 
 from homeassistant.components.binary_sensor import (
     BinarySensorDeviceClass,
     BinarySensorEntity,
+    BinarySensorEntityDescription,
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -12,9 +14,49 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_ENTITY_ID
 
 from .const import DOMAIN, LOCATION_SOURCE_DEVICE, LOCATION_SOURCE_ZONE
-from .sensor import BeAlertLocationEntity, _slug
+from .sensor import (
+    BeAlertLocationEntity,
+    BeAlertLocationSensorConfig,
+    _slug,
+    BeAlertLocationSensor,
+)
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def _create_location_entities(
+    hass: HomeAssistant,
+    entry: ConfigEntry,
+    coordinator,
+    fetcher,
+    sensor_config: dict[str, Any],
+) -> list[BeAlertLocationEntity]:
+    """Create location-based sensor and binary_sensor entities."""
+    entities = []
+    entity_id = sensor_config.get(CONF_ENTITY_ID)
+    if not entity_id:
+        return []
+
+    state = hass.states.get(entity_id)
+    friendly_name = (
+        state.name if state and state.name else entity_id.split(".")[-1]
+    )
+
+    # Create config for the sensor
+    sensor_name = f"BE Alert {friendly_name}"
+    sensor_unique_id = f"be_alert_{_slug(entity_id)}"
+    config = BeAlertLocationSensorConfig(
+        hass=hass,
+        fetcher=fetcher,
+        coordinator=coordinator,
+        source_entity_id=entity_id,
+        name=sensor_name,
+        unique_id=sensor_unique_id,
+        entry_id=entry.entry_id,
+    )
+    entities.append(BeAlertLocationSensor(config))
+    entities.append(BeAlertLocationBinarySensor(config))
+    return entities
 
 
 async def async_setup_entry(
@@ -38,33 +80,9 @@ async def async_setup_entry(
         sensor_type = sensor_config.get("type")
 
         if sensor_type in (LOCATION_SOURCE_DEVICE, LOCATION_SOURCE_ZONE):
-            entity_id = sensor_config.get(CONF_ENTITY_ID)
-            if not entity_id:
-                continue
-
-            state = hass.states.get(entity_id)
-            if state and state.name:
-                friendly_name = state.name
-            else:
-                friendly_name = entity_id.split(".")[-1]
-            sensor_name = f"BE Alert {friendly_name} Alerting"
-            sensor_unique_id = f"be_alert_{_slug(entity_id)}_alerting"
-
-            _LOGGER.warning(
-                "binary_sensor.async_setup_entry: Preparing location "
-                "binary_sensor. Name: '%s', Unique ID: '%s'",
-                sensor_name,
-                sensor_unique_id,
-            )
-            entities_to_add.append(
-                BeAlertLocationBinarySensor(
-                    hass,
-                    fetcher,
-                    coordinator,
-                    entity_id,
-                    sensor_name,
-                    sensor_unique_id,
-                    entry.entry_id,
+            entities_to_add.extend(
+                _create_location_entities(
+                    hass, entry, coordinator, fetcher, sensor_config
                 )
             )
 
@@ -76,27 +94,12 @@ class BeAlertLocationBinarySensor(BeAlertLocationEntity, BinarySensorEntity):
 
     _attr_device_class = BinarySensorDeviceClass.SAFETY
 
-    def __init__(
-        self,
-        hass: HomeAssistant,
-        fetcher,
-        coordinator,
-        source_entity_id: str,
-        name: str,
-        unique_id: str,
-        entry_id: str,
-    ):
-        super().__init__(
-            hass,
-            fetcher,
-            coordinator,
-            source_entity_id,
-            name,
-            unique_id,
-            entry_id,
-        )
-        self._attr_name = name
-        self._attr_unique_id = unique_id
+    def __init__(self, config: BeAlertLocationSensorConfig):
+        """Initialize the location binary sensor."""
+        # The unique ID and name for the binary sensor are derived from the base config
+        binary_sensor_name = f"{config.name} Alerting"
+        binary_sensor_unique_id = f"{config.unique_id}_alerting"
+        super().__init__(config, binary_sensor_name, binary_sensor_unique_id)
 
     @property
     def is_on(self) -> bool:

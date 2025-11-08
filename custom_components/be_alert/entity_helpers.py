@@ -7,7 +7,8 @@ from typing import Any, TYPE_CHECKING
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
     from homeassistant.config_entries import ConfigEntry
-    from .sensor import BeAlertLocationEntity, BeAlertLocationSensor  # noqa: F401
+    from .sensor import BeAlertLocationEntity  # noqa: F401
+    from .sensor import BeAlertLocationSensor  # noqa: F401
     from .binary_sensor import BeAlertLocationBinarySensor  # noqa: F401
 
 from homeassistant.const import CONF_ENTITY_ID

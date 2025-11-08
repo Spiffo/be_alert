@@ -187,7 +187,7 @@ class BeAlertAllSensor(BeAlertDevice, SensorEntity):
         return len(self._fetcher.alerts)
 
     @property
-    def extra_state_attributes(self):
+    def extra_state_attributes(self) -> dict[str, Any]:
         attrs: dict[str, Any] = {
             "alerts": [
                 {
@@ -246,7 +246,7 @@ class BeAlertLocationEntity(CoordinatorEntity):
         self._matches: list[dict] = []
 
     @property
-    def extra_state_attributes(self):
+    def extra_state_attributes(self) -> dict[str, Any]:
         """Return the state attributes."""
         attrs: dict[str, Any] = {"source": self.config.source_entity_id}
         if self._matches:

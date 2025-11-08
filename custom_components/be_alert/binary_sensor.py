@@ -6,7 +6,6 @@ from typing import Any
 from homeassistant.components.binary_sensor import (
     BinarySensorDeviceClass,
     BinarySensorEntity,
-    BinarySensorEntityDescription,
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -96,10 +95,12 @@ class BeAlertLocationBinarySensor(BeAlertLocationEntity, BinarySensorEntity):
 
     def __init__(self, config: BeAlertLocationSensorConfig):
         """Initialize the location binary sensor."""
-        # The unique ID and name for the binary sensor are derived from the base config
+        # The unique ID and name for the binary sensor are derived from the
+        # base config
         binary_sensor_name = f"{config.name} Alerting"
-        binary_sensor_unique_id = f"{config.unique_id}_alerting"
-        super().__init__(config, binary_sensor_name, binary_sensor_unique_id)
+        super().__init__(
+            config, binary_sensor_name, f"{config.unique_id}_alerting"
+        )
 
     @property
     def is_on(self) -> bool:

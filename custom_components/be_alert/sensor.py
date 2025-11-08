@@ -1,7 +1,6 @@
 """BE Alert sensor platform."""
 
 import logging
-import re
 
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.helpers.entity_registry import (
@@ -19,6 +18,8 @@ from .const import DOMAIN, LOCATION_SOURCE_DEVICE, LOCATION_SOURCE_ZONE, Any
 from .binary_sensor import _create_location_entities
 from .data import BeAlertFetcher
 from .models import BeAlertLocationSensorConfig, _slug
+
+_LOGGER = logging.getLogger(__name__)
 
 
 async def _async_cleanup_stale_entities(
@@ -57,7 +58,7 @@ async def _async_cleanup_stale_entities(
 
 def _create_entities_from_config(
     hass: HomeAssistant, entry, coordinator, fetcher, configured_sensors
-) -> list[SensorEntity]:
+) -> list[SensorEntity]:  # pylint: disable=R0914
     """Create sensor entities based on the integration's configuration."""
     entities_to_add: list[SensorEntity] = []
 
@@ -235,7 +236,7 @@ class BeAlertLocationEntity(CoordinatorEntity):
             identifiers={(DOMAIN, slug)},
             name=device_name,
             manufacturer="BE-Alert",
-            model=f"Tracked {config.source_entity_id.split('.')[0]}",
+            model=f"Tracked {config.source_entity_id.split('.', 1)[0]}",
             via_device=(DOMAIN, config.entry_id),
         )
 
@@ -285,7 +286,8 @@ class BeAlertLocationEntity(CoordinatorEntity):
         else:
             self._source_has_coords = False
             _LOGGER.debug(
-                "Could not get coordinates for %s, location sensor unavailable.",
+                "Could not get coordinates for %s, location sensor "
+                "unavailable.",
                 self.config.source_entity_id,
             )
 

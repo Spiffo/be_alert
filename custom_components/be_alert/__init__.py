@@ -8,6 +8,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 import homeassistant.helpers.config_validation as cv
+from .data import BeAlertFetcher
 from .const import DOMAIN, DEFAULT_SCAN_INTERVAL
 
 _LOGGER = logging.getLogger(__name__)
@@ -37,8 +38,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Create a new coordinator for this config entry.
     # This ensures that on every reload, we get a fresh coordinator with the
     # correct settings.
-    from .data import BeAlertFetcher  # pylint: disable=import-outside-toplevel
-
     session = async_get_clientsession(hass)
     fetcher = BeAlertFetcher(session)
 

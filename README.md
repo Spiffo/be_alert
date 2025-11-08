@@ -23,9 +23,13 @@ This custom integration provides **real-time BE-Alert notifications** for Belgiu
 
 ### HACS (recommended)
 1. Ensure [HACS](https://hacs.xyz/) is installed.
-2. In HACS, go to **Integrations** → **Custom repositories**  
-3. Add this repository URL: `https://github.com/Spiffo/be-alert` with category `Integration`.
-4. Install, then restart Home Assistant  
+2. In HACS, go to **Integrations**.
+3. Click the three dots in the top right and select **Custom repositories**.
+4. In the dialog, enter the following:
+   - **Repository:** `https://github.com/Spiffo/be-alert`
+   - **Category:** `Integration`
+5. Click **Add**, then find the "BE-Alert" card and click **Install**.
+6. Restart Home Assistant.
 
 ### Manual
 1. Copy the `be_alert` folder from `custom_components` into your own `custom_components` directory.

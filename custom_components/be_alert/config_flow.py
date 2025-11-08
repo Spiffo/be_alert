@@ -32,7 +32,12 @@ class BEAlertConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return False
 
     async def async_step_user(self, user_input: dict[str, Any] | None = None):
-        """Handle the initial setup of the integration hub."""
+        """Handle the initial user setup step.
+
+        This step is shown when the user first adds the integration.
+        It checks if an instance is already configured and if not, creates a
+        single entry for the integration hub.
+        """
         # Abort if an instance is already configured.
         _LOGGER.warning("ConfigFlow.async_step_user: Started.")
         if self._async_current_entries():
@@ -64,14 +69,18 @@ class BEAlertOptionsFlow(config_entries.OptionsFlow):
     """BE Alert options flow."""
 
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
-        """Initialize options flow without accessing the entry properties."""
+        """Initialize the BE Alert options flow."""
         super().__init__()
         self._entry: config_entries.ConfigEntry = config_entry
         _LOGGER.warning("OptionsFlow.__init__: Initializing options flow.")
         self._sensor_type: str | None = None
 
     async def async_step_init(self, _user_input=None):
-        """Show the main menu for the options flow."""
+        """Display the main menu for the options flow.
+
+        This menu allows the user to add or remove sensors, or change global
+        settings.
+        """
         _LOGGER.warning(
             "OptionsFlow.async_step_init: Showing menu for entry %s.",
             self._entry.entry_id,
@@ -84,7 +93,11 @@ class BEAlertOptionsFlow(config_entries.OptionsFlow):
     async def async_step_settings(
         self, user_input: dict[str, Any] | None = None
     ):
-        """Handle global settings like polling interval."""
+        """Handle the global settings for the integration.
+
+        This step allows the user to configure settings like the polling
+        interval.
+        """
         _LOGGER.warning("OptionsFlow.async_step_settings: Started.")
         options = dict(self._entry.options or {})
         if user_input is not None:
@@ -113,7 +126,11 @@ class BEAlertOptionsFlow(config_entries.OptionsFlow):
     async def async_step_add_sensor(
         self, user_input: dict[str, Any] | None = None
     ):
-        """First step in adding a sensor: choose the type."""
+        """Handle the first step of adding a new sensor: choosing its type.
+
+        The user can choose to add a sensor for all alerts, or a
+        location-based sensor for a zone or device.
+        """
         _LOGGER.warning("OptionsFlow.async_step_add_sensor: Started.")
         options = dict(self._entry.options or {})
         if user_input is not None:
@@ -159,7 +176,11 @@ class BEAlertOptionsFlow(config_entries.OptionsFlow):
     async def async_step_select_entity(
         self, user_input: dict[str, Any] | None = None
     ):
-        """Step to select the zone or device entity."""
+        """Handle the selection of an entity for a location-based sensor.
+
+        This step filters and shows a list of eligible entities (zones or
+        device trackers/persons) for the user to select from.
+        """
         _LOGGER.warning("OptionsFlow.async_step_select_entity: Started.")
         options = dict(self._entry.options or {})
         errors = {}
@@ -169,29 +190,19 @@ class BEAlertOptionsFlow(config_entries.OptionsFlow):
                 "OptionsFlow.async_step_select_entity: Filtering for "
                 "device/person entities."
             )
-            # Build a list of eligible entities: persons with location
-            # and device_trackers with GPS source.
-            eligible_entities = []
-
-            # Add person entities that have a location
-            for state in self.hass.states.async_all("person"):
-                lat = state.attributes.get("latitude")
-                lon = state.attributes.get("longitude")
-                if lat is not None and lon is not None:
-                    eligible_entities.append(state.entity_id)
-
-            # Add device_tracker entities that have a GPS source and a
-            # location
-            for state in self.hass.states.async_all("device_tracker"):
-                attributes = state.attributes
-                lat = attributes.get("latitude")
-                lon = attributes.get("longitude")
-                if (
-                    attributes.get("source_type") == "gps"
-                    and lat is not None
-                    and lon is not None
-                ):
-                    eligible_entities.append(state.entity_id)
+            # Build a list of eligible entities: persons and device_trackers
+            # with GPS source that have location attributes.
+            eligible_entities = [
+                state.entity_id
+                for domain in ("person", "device_tracker")
+                for state in self.hass.states.async_all(domain)
+                if state.attributes.get("latitude") is not None
+                and state.attributes.get("longitude") is not None
+                and (
+                    domain == "person"
+                    or state.attributes.get("source_type") == "gps"
+                )
+            ]
 
             selector_cfg = selector.EntitySelectorConfig(
                 include_entities=eligible_entities
@@ -240,7 +251,11 @@ class BEAlertOptionsFlow(config_entries.OptionsFlow):
     async def async_step_remove_sensor(
         self, user_input: dict[str, Any] | None = None
     ):
-        """Step to remove an existing sensor."""  # noqa: E501
+        """Handle the removal of an existing sensor.
+
+        This step lists all configured sensors and allows the user to select
+        one for removal.
+        """
         _LOGGER.warning("OptionsFlow.async_step_remove_sensor: Started.")
         options = dict(self._entry.options or {})
         sensors = list(options.get("sensors", []))

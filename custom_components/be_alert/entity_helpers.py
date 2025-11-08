@@ -23,8 +23,8 @@ def _create_location_entities(
 ) -> list["BeAlertLocationEntity"]:
     """Create location-based sensor and binary_sensor entities."""
     # Defer imports to prevent circular dependencies at runtime
-    from .sensor import BeAlertLocationSensor
-    from .binary_sensor import BeAlertLocationBinarySensor
+    from .sensor import BeAlertLocationSensor  # noqa: F811
+    from .binary_sensor import BeAlertLocationBinarySensor  # noqa: F811
 
     entities: list[BeAlertLocationEntity] = []
     entity_id = sensor_config.get(CONF_ENTITY_ID)

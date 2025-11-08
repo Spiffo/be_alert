@@ -26,8 +26,8 @@ class BEAlertConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     VERSION = 1
 
-    @classmethod
-    def is_matching(cls, _source: Any) -> bool:  # type: ignore
+    @staticmethod
+    def is_matching(_source: str) -> bool:
         """Return if the source is matching."""
         return False
 

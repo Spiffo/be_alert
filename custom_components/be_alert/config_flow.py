@@ -26,11 +26,6 @@ class BEAlertConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     VERSION = 1
 
-    @staticmethod
-    def is_matching(_source: Any) -> bool:
-        """Return if the source is matching."""
-        return False
-
     async def async_step_user(self, user_input: dict[str, Any] | None = None):
         """Handle the initial user setup step.
 

@@ -2,7 +2,7 @@
 
 This custom integration provides **real-time BE-Alert notifications** for Belgium. Alerts include emergencies such as fire, weather, pollution, and public safety. The integration allows you to create sensors for all of Belgium or for specific zones and devices in Home Assistant.
 
-![BE-Alert logo](https://raw.githubusercontent.com/Spiffo/be_alert/main/custom_components/be_alert/logo.png)
+![BE-Alert logo](https://raw.githubusercontent.com/Spiffo/be_alert/main/custom_components/be_alert/icon.png)
 
 ---
 

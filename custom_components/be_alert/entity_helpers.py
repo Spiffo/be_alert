@@ -1,4 +1,6 @@
-"""Entity helper functions for the BE Alert integration."""
+# pylint: disable=import-outside-toplevel, wrong-import-position
+"""Entity helper functions for the BE Alert integration.
+Pylint is disabled for this file because it uses a standard HA pattern."""
 
 from __future__ import annotations
 
@@ -6,10 +8,10 @@ from typing import Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
-    from homeassistant.config_entries import ConfigEntry
-    from .sensor import BeAlertLocationEntity  # noqa: F401
-    from .sensor import BeAlertLocationSensor  # noqa: F401
-    from .binary_sensor import BeAlertLocationBinarySensor  # noqa: F401
+    from homeassistant.config_entries import ConfigEntry  # noqa: F401
+    from .sensor import BeAlertLocationEntity  # noqa: F401, F403
+    from .sensor import BeAlertLocationSensor  # noqa: F401, F403
+    from .binary_sensor import BeAlertLocationBinarySensor  # noqa: F401, F403
 
 from homeassistant.const import CONF_ENTITY_ID
 from .models import BeAlertLocationSensorConfig, _slug

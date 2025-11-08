@@ -244,7 +244,6 @@ class BeAlertLocationEntity(CoordinatorEntity):
         self._lat: float | None = None
         self._lon: float | None = None
         self._matches: list[dict] = []
-        self._source_has_coords: bool = False
 
     @property
     def extra_state_attributes(self):
@@ -268,7 +267,7 @@ class BeAlertLocationEntity(CoordinatorEntity):
     @property
     def available(self) -> bool:
         """Entity availability depends on source entity having coordinates."""
-        return self._source_has_coords
+        return self._lat is not None and self._lon is not None
 
     async def async_added_to_hass(self) -> None:
         """Run when entity about to be added to hass."""
@@ -282,9 +281,9 @@ class BeAlertLocationEntity(CoordinatorEntity):
         )
         if coords:
             self._lat, self._lon = coords
-            self._source_has_coords = True
         else:
-            self._source_has_coords = False
+            self._lat = None
+            self._lon = None
             _LOGGER.debug(
                 "Could not get coordinates for %s, location sensor "
                 "unavailable.",
@@ -296,7 +295,7 @@ class BeAlertLocationEntity(CoordinatorEntity):
         # First, get the most recent location
         self._update_location()
         # Then, find alerts for that location if source is available
-        if self._source_has_coords:
+        if self.available:
             self._matches = self.config.fetcher.alerts_affecting_point(
                 self._lon, self._lat
             )
@@ -306,7 +305,7 @@ class BeAlertLocationEntity(CoordinatorEntity):
             "BE Alert: %s found %d active alerts (available=%s)",
             self.name,
             len(self._matches),
-            self._source_has_coords,
+            self.available,
         )
         self.async_write_ha_state()
 

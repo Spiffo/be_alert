@@ -47,5 +47,10 @@
                 }
             }
         }
+    },
+    "entity": {
+        "sensor": {
+            "location_alert_count": { "name": "Meldingen" }
+        }
     }
 }

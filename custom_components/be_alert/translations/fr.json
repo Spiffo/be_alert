@@ -1,0 +1,54 @@
+{
+    "title": "BE Alert",
+    "config": {
+        "step": {
+            "user": {
+                "title": "Ajouter l'intégration BE Alert",
+                "description": "Ceci configurera l'intégration centrale BE Alert. Vous pourrez ajouter des capteurs individuels après cette étape."
+            }
+        },
+        "abort": {
+            "single_instance_allowed": "Une seule instance de l'intégration BE Alert est autorisée.",
+            "all_sensor_exists": "Le capteur 'Toutes les alertes' est déjà configuré.",
+            "no_sensors_to_remove": "Il n'y a aucun capteur à supprimer.",
+            "entity_already_configured": "Un capteur pour cette entité est déjà configuré."
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "menu_options": {
+                    "add_sensor": "Ajouter un nouveau capteur",
+                    "remove_sensor": "Supprimer un capteur",
+                    "settings": "Paramètres globaux"
+                }
+            },
+            "settings": {
+                "title": "Paramètres globaux",
+                "data": {
+                    "scan_interval": "Intervalle de mise à jour (minutes)"
+                }
+            },
+            "add_sensor": {
+                "title": "Ajouter un capteur"
+            },
+            "select_entity": {
+                "title": "Sélectionner une entité",
+                "data": {
+                    "entity_id": "Entité à suivre"
+                }
+            },
+            "remove_sensor": {
+                "title": "Supprimer un capteur",
+                "data": {
+                    "sensor_to_remove": "Capteur à supprimer"
+                }
+            }
+        }
+    },
+    "entity": {
+        "sensor": {
+            "location_alert_count": { "name": "Alertes" }
+        }
+    }
+}

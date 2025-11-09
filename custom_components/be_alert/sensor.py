@@ -213,7 +213,8 @@ class BeAlertLocationEntity(CoordinatorEntity):
     """Sensor showing number of alerts that affect the configured
     zone/device."""
 
-    _attr_has_entity_name = True
+    _attr_has_entity_name = True  # Name is inherited from device
+    translation_key = "location_alert_count"
 
     def __init__(
         self,
@@ -223,7 +224,7 @@ class BeAlertLocationEntity(CoordinatorEntity):
     ):
         """Initialize the location entity."""  # noqa: R0913
         super().__init__(config.coordinator)
-        self.config = config
+        self.config = config  # pylint: disable=invalid-name
         self._attr_name = name or config.name
         self._attr_unique_id = unique_id or config.unique_id
 
@@ -242,7 +243,7 @@ class BeAlertLocationEntity(CoordinatorEntity):
 
         # These will be populated during the update
         self._lat: float | None = None
-        self._lon: float | None = None
+        self._lon: float | None = None  # pylint: disable=invalid-name
         self._matches: list[dict] = []
 
     @property
@@ -316,7 +317,7 @@ class BeAlertLocationSensor(BeAlertLocationEntity, SensorEntity):
 
     def __init__(self, config: BeAlertLocationSensorConfig):
         """Initialize the location sensor."""
-        super().__init__(config, config.name, config.unique_id)
+        super().__init__(config, None, config.unique_id)
 
     @property
     def native_value(self):

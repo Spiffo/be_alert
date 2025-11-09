@@ -8,7 +8,6 @@ from typing import Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
-    from homeassistant.config_entries import ConfigEntry  # noqa: F401
     from .sensor import BeAlertLocationEntity  # noqa: F401, F403
     from .sensor import BeAlertLocationSensor  # noqa: F401, F403
     from .binary_sensor import BeAlertLocationBinarySensor  # noqa: F401, F403
@@ -19,7 +18,7 @@ from .models import BeAlertLocationSensorConfig, _slug
 
 def _create_location_entities(
     hass: "HomeAssistant",
-    entry: "ConfigEntry",
+    entry_id: str,
     coordinator,
     fetcher,
     sensor_config: dict[str, Any],
@@ -48,7 +47,7 @@ def _create_location_entities(
         entity_id,
         sensor_name,
         sensor_unique_id,
-        entry.entry_id,
+        entry_id,
     )
     entities.append(BeAlertLocationSensor(config))
     entities.append(BeAlertLocationBinarySensor(config))

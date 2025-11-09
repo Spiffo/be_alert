@@ -8,12 +8,11 @@ This custom integration provides **real-time BE-Alert notifications** for Belgiu
 
 ## Features
 - Retrieves official BE-Alert warnings for all of Belgium.
-- Creates a central "hub" device for the integration.
-- Creates separate devices for each tracked `zone` or `device_tracker`, linked to the hub.
-- Provides a sensor for all alerts nationwide (`sensor.be_alert_all`).
+- Provides a standalone sensor for all alerts nationwide (`sensor.be_alert_all`).
+- Creates a separate Home Assistant **Device** for each tracked `zone` or `device_tracker` to neatly group its entities.
 - For each tracked location, it creates:
-  - A sensor showing the *count* of active alerts (e.g., `sensor.be_alert_home`).
-  - A binary sensor that is `on` if there is an active alert (e.g., `binary_sensor.be_alert_home_alerting`), perfect for automations.
+  - A sensor showing the *count* of active alerts (e.g., `sensor.be_alert_zone_home`).
+  - A binary sensor that is `on` if there is an active alert (e.g., `binary_sensor.be_alert_zone_home_alerting`), perfect for automations.
 - Configurable polling interval.
 - Manual update service (`be_alert.update`) to force a refresh.
 
@@ -39,33 +38,32 @@ This custom integration provides **real-time BE-Alert notifications** for Belgiu
 
 ## Entities
 
-This integration uses a hub-and-spoke model to organize its devices and entities.
+This integration creates a standalone sensor for nationwide alerts and dedicated devices for each location you track.
 
-### Main Hub Device
-A central "BE Alert" device is created to represent the integration itself.
-
-#### "All Alerts" Sensor (`sensor.be_alert_all`)
-This sensor is attached to the main hub device and shows the total number of active alerts across all of Belgium.
+### "All Alerts" Sensor (`sensor.be_alert_all`)
+This is a standalone entity (not attached to a device) that shows the total number of active alerts across all of Belgium.
 - **State**: Count of current active alerts.
 - **Attributes**: A list of all active alerts with details like title, description, category, etc.
 
-### Location-based Devices
-For each `zone` or `device_tracker` you choose to monitor, a new device is created (e.g., a device for `zone.home`). This device is linked to the main hub and contains the following entities:
+### Location-Based Devices
+For each `zone` or `device_tracker` you choose to monitor, a new **Device** is created in Home Assistant (e.g., a device named "Home" for `zone.home`). This device contains the following entities, giving you a clean and organized structure.
 
-#### Location Alert Count Sensor (e.g., `sensor.be_alert_home`)
+#### Location Alert Count Sensor (e.g., `sensor.be_alert_zone_home`)
 Shows the number of active alerts affecting this specific location.
 - **State**: Count of alerts affecting the location.
 - **Attributes**: A list of alerts specific to this location.
+- **Entity ID format**: `sensor.be_alert_<slug_of_tracked_entity>`
 
-#### Location Alerting Binary Sensor (e.g., `binary_sensor.be_alert_home_alerting`)
+#### Location Alerting Binary Sensor (e.g., `binary_sensor.be_alert_zone_home_alerting`)
 A boolean sensor that indicates if there is an active alert for the location. This is the recommended entity to use for automations.
 - **State**: `on` if one or more alerts are active for the location; `off` otherwise.
+- **Entity ID format**: `binary_sensor.be_alert_<slug_of_tracked_entity>_alerting`
 
 ---
 
 ## Configuration
 1. Go to **Settings → Devices & Services → Add Integration** and search for **BE-Alert**.
-2. Follow the on-screen instructions to add the central integration hub.
+2. Follow the on-screen instructions to add the BE-Alert integration.
 3. Once added, click **Configure** on the BE-Alert integration card.
 4. From the menu, you can:
     - **Add a new sensor**: Choose between "All Alerts", "Zone-based", or "Device-based".
@@ -106,7 +104,7 @@ This automation triggers when an alert becomes active for your `zone.home`. It f
 alias: "BE-Alert: Announce alert for Home"
 trigger:
   - platform: state
-    entity_id: binary_sensor.be_alert_home_alerting # Assumes you have a sensor for zone.home
+    entity_id: binary_sensor.be_alert_zone_home_alerting # Change to your location's binary sensor
     to: "on"
 action:
   - service: light.turn_on

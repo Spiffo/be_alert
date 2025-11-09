@@ -50,7 +50,11 @@
     },
     "entity": {
         "sensor": {
-            "location_alert_count": { "name": "Meldingen" }
+            "location_alert_count": { "name": "Meldingen" },
+            "all_alerts": { "name": "Alle Meldingen" }
+        },
+        "binary_sensor": {
+            "location_alerting": { "name": "Alarmering" }
         }
     }
 }

@@ -4,7 +4,7 @@ import logging
 from datetime import timedelta
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 import homeassistant.helpers.config_validation as cv
@@ -67,7 +67,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Register the update service if it doesn't exist yet
     if not hass.services.has_service(DOMAIN, "update"):
 
-        async def async_update_service(_service_call):
+        async def async_update_service(_service_call: ServiceCall) -> None:
             """Handle the service call to update all BE Alert coordinators."""
             _LOGGER.info(
                 "BE Alert update service called, refreshing all coordinators."
@@ -92,7 +92,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return True
 
 
-async def async_update_options(hass: HomeAssistant, entry: ConfigEntry):
+async def async_update_options(
+    hass: HomeAssistant, entry: ConfigEntry
+) -> None:
     """Handle options update."""
     _LOGGER.warning(
         "__init__.async_update_options: Options updated, reloading integr."

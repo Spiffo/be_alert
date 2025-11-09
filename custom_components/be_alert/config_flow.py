@@ -75,7 +75,9 @@ class BEAlertOptionsFlow(config_entries.OptionsFlow):
         _LOGGER.warning("OptionsFlow.__init__: Initializing options flow.")
         self._sensor_type: str | None = None
 
-    async def async_step_init(self, _user_input=None):
+    async def async_step_init(
+        self, _user_input: dict[str, Any] | None = None
+    ) -> config_entries.ConfigFlowResult:
         """Display the main menu for the options flow.
 
         This menu allows the user to add or remove sensors, or change global
@@ -125,7 +127,7 @@ class BEAlertOptionsFlow(config_entries.OptionsFlow):
 
     async def async_step_add_sensor(
         self, user_input: dict[str, Any] | None = None
-    ):
+    ) -> config_entries.ConfigFlowResult:
         """Handle the first step of adding a new sensor: choosing its type.
 
         The user can choose to add a sensor for all alerts, or a

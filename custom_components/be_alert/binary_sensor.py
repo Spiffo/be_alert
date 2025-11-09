@@ -42,7 +42,7 @@ async def async_setup_entry(
             # _create_location_entities returns both sensor and binary_sensor
             # Filter for BinarySensorEntity here.
             location_entities = _create_location_entities(
-                hass, entry, coordinator, fetcher, sensor_config
+                hass, entry.entry_id, coordinator, fetcher, sensor_config
             )
             binary_sensor_entities = [
                 e
@@ -57,16 +57,13 @@ async def async_setup_entry(
 class BeAlertLocationBinarySensor(BeAlertLocationEntity, BinarySensorEntity):
     """Binary sensor showing if alerts affect the configured zone/device."""
 
+    _attr_has_entity_name = True
     _attr_device_class = BinarySensorDeviceClass.SAFETY
+    translation_key = "location_alerting"
 
     def __init__(self, config: BeAlertLocationSensorConfig):
         """Initialize the location binary sensor."""
-        # The unique ID and name for the binary sensor are derived from the
-        # base config
-        binary_sensor_name = f"{config.name} Alerting"
-        super().__init__(
-            config, binary_sensor_name, f"{config.unique_id}_alerting"
-        )
+        super().__init__(config, None, f"{config.unique_id}_alerting")
 
     @property
     def is_on(self) -> bool:

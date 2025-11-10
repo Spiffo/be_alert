@@ -57,13 +57,14 @@ async def async_setup_entry(
 class BeAlertLocationBinarySensor(BeAlertLocationEntity, BinarySensorEntity):
     """Binary sensor showing if alerts affect the configured zone/device."""
 
-    _attr_has_entity_name = True
     _attr_device_class = BinarySensorDeviceClass.SAFETY
-    translation_key = "location_alerting"
 
     def __init__(self, config: BeAlertLocationSensorConfig):
         """Initialize the location binary sensor."""
-        super().__init__(config, None, f"{config.unique_id}_alerting")
+        binary_sensor_name = f"{config.name} Alerting"
+        super().__init__(
+            config, binary_sensor_name, f"{config.unique_id}_alerting"
+        )
 
     @property
     def is_on(self) -> bool:

@@ -204,9 +204,6 @@ class BeAlertLocationEntity(CoordinatorEntity[DataUpdateCoordinator]):
     """Sensor showing number of alerts that affect the configured
     zone/device."""
 
-    _attr_has_entity_name = True  # Name is inherited from device
-    translation_key = "location_alert_count"
-
     def __init__(
         self,
         config: BeAlertLocationSensorConfig,

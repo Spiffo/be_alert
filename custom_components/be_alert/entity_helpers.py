@@ -33,13 +33,20 @@ def _create_location_entities(
     if not entity_id:
         return []
 
-    sensor_unique_id = f"be_alert_{_slug(entity_id)}"
+    # Get a friendly name from the source entity to build the sensor name
+    state = hass.states.get(entity_id)
+    friendly_name = (
+        state.name if state and state.name else entity_id.split(".")[-1]
+    )
+    sensor_name = f"BE Alert {friendly_name}"
+    # Append '-loc' to the unique_id to break from old cached entities
+    sensor_unique_id = f"be_alert_loc_{_slug(entity_id)}"
     config = BeAlertLocationSensorConfig(
         hass,
         fetcher,
         coordinator,
         entity_id,
-        None,  # Name is now handled by translation_key, pass None
+        sensor_name,
         sensor_unique_id,
         entry_id,
     )

@@ -20,7 +20,7 @@ class BeAlertLocationSensorConfig:
     fetcher: BeAlertFetcher
     coordinator: DataUpdateCoordinator
     source_entity_id: str
-    name: str
+    name: str | None
     unique_id: str
     entry_id: str
 

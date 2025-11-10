@@ -94,7 +94,7 @@ class BEAlertOptionsFlow(config_entries.OptionsFlow):
 
     async def async_step_settings(
         self, user_input: dict[str, Any] | None = None
-    ):
+    ) -> config_entries.ConfigFlowResult:
         """Handle the global settings for the integration.
 
         This step allows the user to configure settings like the polling
@@ -177,7 +177,7 @@ class BEAlertOptionsFlow(config_entries.OptionsFlow):
 
     async def async_step_select_entity(
         self, user_input: dict[str, Any] | None = None
-    ):
+    ) -> config_entries.ConfigFlowResult:
         """Handle the selection of an entity for a location-based sensor.
 
         This step filters and shows a list of eligible entities (zones or
@@ -252,7 +252,7 @@ class BEAlertOptionsFlow(config_entries.OptionsFlow):
 
     async def async_step_remove_sensor(
         self, user_input: dict[str, Any] | None = None
-    ):
+    ) -> config_entries.ConfigFlowResult:
         """Handle the removal of an existing sensor.
 
         This step lists all configured sensors and allows the user to select

@@ -14,3 +14,18 @@ FEED_URL = (
     "capCategory=Geo,Met,Safety,Security,Rescue,Fire,Health,Env,Transport,"
     "Infra,CBRNE,Other&outdated=false"
 )
+
+ALERT_CATEGORIES = [
+    "Geo",  # Geophysical
+    "Met",  # Meteorological
+    "Safety",
+    "Security",
+    "Rescue",
+    "Fire",
+    "Health",
+    "Env",  # Environmental
+    "Transport",
+    "Infra",  # Infrastructure
+    "CBRNE",  # Chemical, Biological, Radiological, Nuclear, and Explosives
+    "Other",
+]

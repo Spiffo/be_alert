@@ -36,6 +36,7 @@
             },
             "select_entity": {
                 "title": "Select Entity",
+                "description": "Select a person, device tracker, or zone to monitor for alerts.",
                 "data": {
                     "entity_id": "Entity to track"
                 }

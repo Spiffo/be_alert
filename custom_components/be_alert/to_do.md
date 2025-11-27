@@ -2,13 +2,13 @@ TO DO / TO FIX:
 
 # DONE: sensor.be_alert_all_ hangt onder zelfde hub als eerste sensor, eigen hub geven
 
-# TODO: Vertaling wordt nog steeds niet netjes opgepikt
+# DONE: Vertaling wordt nog steeds niet netjes opgepikt
 
 # DONE: sensor update moet kijken naar huidige lat long  van device / zone waarop gebaseerd is
 
 # DONE: volgens mij worden maar een paar van de sensoren gerefreshed...
 
-# TODO: Logo overal toevoegen
+# DONE: Logo overal toevoegen
 
 # DONE: set icon for sensor
 
@@ -22,8 +22,12 @@ TO DO / TO FIX:
 
 # DONE: zone or device alerts should be boolean sensors: alerting or not alerting
 
-# TODO: before you call the webservice, check if there are any sensors or binary sensors that exist under this integration
+# NOT DOING: before you call the webservice, check if there are any sensors or binary sensors that exist under this integration
 
 # DONE: check if unloading a sensor actually happens
 
-# TODO: Can you help me create a `hacs.json` file for this integration?
+# DONE: Can you help me create a `hacs.json` file for this integration?
+
+# DONE: Review the readme to see if it needs any changes since the last changes to the integration. 
+
+# DONE: in the device dropdown, what kind of devices are there? It seems also persons can be selected?

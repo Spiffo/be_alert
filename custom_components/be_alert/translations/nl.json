@@ -36,6 +36,7 @@
             },
             "select_entity": {
                 "title": "Selecteer entiteit",
+                "description": "Selecteer een persoon, apparaat-tracker of zone om te monitoren voor meldingen.",
                 "data": {
                     "entity_id": "Te volgen entiteit"
                 }

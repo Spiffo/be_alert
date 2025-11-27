@@ -1,120 +1,109 @@
-# BE-Alert Integration for Home Assistant
+# BE Alert Integration for Home Assistant
 
-This custom integration provides **real-time BE-Alert notifications** for Belgium. Alerts include emergencies such as fire, weather, pollution, and public safety. The integration allows you to create sensors for all of Belgium or for specific zones and devices in Home Assistant.
+[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/hacs/integration)
 
-![BE-Alert logo](https://raw.githubusercontent.com/Spiffo/be_alert/main/custom_components/be_alert/icon.png)
-
----
+The **BE Alert** integration for Home Assistant allows you to monitor the official Belgian public alert system, [be-alert.be](https://be-alert.be). It fetches active alerts and creates sensors in Home Assistant so you can stay informed and create automations based on emergency situations.
 
 ## Features
-- Retrieves official BE-Alert warnings for all of Belgium.
-- Provides a standalone sensor for all alerts nationwide (`sensor.be_alert_all`).
-- Creates a separate Home Assistant **Device** for each tracked `zone` or `device_tracker` to neatly group its entities.
-- For each tracked location, it creates:
-  - A sensor showing the *count* of active alerts (e.g., `sensor.be_alert_zone_home`).
-  - A binary sensor that is `on` if there is an active alert (e.g., `binary_sensor.be_alert_zone_home_alerting`), perfect for automations.
-- Configurable polling interval.
-- Manual update service (`be_alert.update`) to force a refresh.
 
----
+- **All Alerts Sensor**: A global sensor (`sensor.be_alert_all_alerts`) that shows the total count of active alerts across Belgium. Its attributes contain a list of all current alerts.
+- **Location-Based Monitoring**: Create sensors to monitor alerts for specific locations.
+- **Multiple Location Sources**: Track alerts for:
+  - **Persons**: `person` entities.
+  - **Device Trackers**: `device_tracker` entities (with GPS).
+  - **Zones**: `zone` entities (e.g., `zone.home`, `zone.work`).
+- **Dual Sensors for Locations**: For each tracked location, the integration creates two entities:
+  - A `sensor` (e.g., `sensor.be_alert_peter`) that counts how many active alerts affect that specific location.
+  - A `binary_sensor` (e.g., `binary_sensor.be_alert_peter_alerting`) that turns `on` if there is one or more active alerts for the location.
+- **Configurable Update Interval**: Set how often the integration should check for new alerts.
+- **Manual Refresh**: Trigger an immediate update for all sensors using the `be_alert.update` service.
 
 ## Installation
 
-### HACS (recommended)
-1. Ensure [HACS](https://hacs.xyz/) is installed.
-2. In HACS, go to **Integrations**.
-3. Click the three dots in the top right and select **Custom repositories**.
-4. In the dialog, enter the following:
-   - **Repository:** `https://github.com/Spiffo/be-alert`
-   - **Category:** `Integration`
-5. Click **Add**, then find the "BE-Alert" card and click **Install**.
-6. Restart Home Assistant.
+### HACS (Recommended)
 
-### Manual
-1. Copy the `be_alert` folder from `custom_components` into your own `custom_components` directory.
-2. Restart Home Assistant.
+1.  Ensure you have HACS (Home Assistant Community Store) installed.
+2.  In HACS, go to "Integrations".
+3.  Click the three dots in the top right and select "Custom repositories".
+4.  Add the URL to this repository (`https://github.com/spiffo/be_alert`) and select the "Integration" category.
+5.  Find the "BE Alert" integration in the list and click "Install".
+6.  Restart Home Assistant.
 
----
+### Manual Installation
+
+1.  Copy the `custom_components/be_alert` directory from this repository into your Home Assistant `config/custom_components/` directory.
+2.  Restart Home Assistant.
+
+## Configuration
+
+Configuration is done entirely through the Home Assistant user interface.
+
+1.  Go to **Settings > Devices & Services**.
+2.  Click **Add Integration** and search for **BE Alert**.
+3.  Follow the on-screen prompt to add the integration. This will set up the central hub but won't create any sensors yet.
+
+### Managing Sensors and Settings
+
+After the initial setup, all further management is done by clicking **Configure** on the BE Alert integration card.
+
+This will open a menu with three options:
+
+#### 1. Add a new sensor
+
+This option starts a wizard to add a new alert sensor.
+
+- **All Alerts Sensor**: You can add a single sensor that tracks all alerts in Belgium.
+- **Location-Based Sensor**: Select a `person`, `device_tracker`, or `zone` entity to monitor. The integration will create a device in Home Assistant for this tracked location, containing a count sensor and a binary "alerting" sensor.
+
+#### 2. Remove a sensor
+
+This option shows a list of all your currently configured BE Alert sensors. Select one to remove it.
+
+#### 3. Global Settings
+
+Here you can configure the **Update interval** (in minutes) for how often the integration checks the BE Alert feed. The default is 5 minutes.
 
 ## Entities
 
-This integration creates a standalone sensor for nationwide alerts and dedicated devices for each location you track.
+### Global Sensor
 
-### "All Alerts" Sensor (`sensor.be_alert_all`)
-This is a standalone entity (not attached to a device) that shows the total number of active alerts across all of Belgium.
-- **State**: Count of current active alerts.
-- **Attributes**: A list of all active alerts with details like title, description, category, etc.
+- `sensor.be_alert_all_alerts`:
+  - **State**: The total number of active alerts.
+  - **Attributes**: `alerts` (a list of all alert details), `last_checked`.
 
-### Location-Based Devices
-For each `zone` or `device_tracker` you choose to monitor, a new **Device** is created in Home Assistant (e.g., a device named "Home" for `zone.home`). This device contains the following entities, giving you a clean and organized structure.
+### Location-Based Sensors
 
-#### Location Alert Count Sensor (e.g., `sensor.be_alert_zone_home`)
-Shows the number of active alerts affecting this specific location.
-- **State**: Count of alerts affecting the location.
-- **Attributes**: A list of alerts specific to this location.
-- **Entity ID format**: `sensor.be_alert_<slug_of_tracked_entity>`
+For a tracked entity named "Peter's Phone", the following are created:
 
-#### Location Alerting Binary Sensor (e.g., `binary_sensor.be_alert_zone_home_alerting`)
-A boolean sensor that indicates if there is an active alert for the location. This is the recommended entity to use for automations.
-- **State**: `on` if one or more alerts are active for the location; `off` otherwise.
-- **Entity ID format**: `binary_sensor.be_alert_<slug_of_tracked_entity>_alerting`
+- `sensor.be_alert_peters_phone`:
+  - **State**: The number of alerts affecting the location of Peter's Phone.
+  - **Attributes**: `source` (the entity ID being tracked), `alerts` (a list of relevant alert details).
 
----
+- `binary_sensor.be_alert_peters_phone_alerting`:
+  - **State**: `on` if the alert count is > 0, otherwise `off`.
+  - **Attributes**: `source`.
 
-## Configuration
-1. Go to **Settings → Devices & Services → Add Integration** and search for **BE-Alert**.
-2. Follow the on-screen instructions to add the BE-Alert integration.
-3. Once added, click **Configure** on the BE-Alert integration card.
-4. From the menu, you can:
-    - **Add a new sensor**: Choose between "All Alerts", "Zone-based", or "Device-based".
-    - **Remove a sensor**: Select a previously created sensor to remove it.
-    - **Global Settings**: Adjust the polling interval (in minutes).
+## Service
 
----
-
-## Services
-
-### `be_alert.update`
-Forces an immediate update of the BE-Alert feed data for all sensors.
-
----
-
-## Example Automations
-
-### 1. Send a notification for any new alert in Belgium
-This automation sends a notification to your phone whenever a new alert is published anywhere in the country.
+You can manually trigger a refresh of the alert data by calling the `be_alert.update` service.
 
 ```yaml
-alias: "BE-Alert: Notify on any new alert"
+# Example automation to refresh alerts every hour
 trigger:
-  - platform: numeric_state
-    entity_id: sensor.be_alert_all
-    above: 0
+  - platform: time_pattern
+    hours: "/1"
 action:
-  - service: notify.mobile_app_your_phone # Change to your notification service
-    data:
-      title: "🚨 BE-Alert"
-      message: "{{ state_attr('sensor.be_alert_all', 'alerts')[0].title }}"
+  - service: be_alert.update
 ```
 
-### 2. Announce an alert for your Home zone
-This automation triggers when an alert becomes active for your `zone.home`. It flashes a light and makes an announcement on a Google Home speaker.
+## Alert Categories
 
-```yaml
-alias: "BE-Alert: Announce alert for Home"
-trigger:
-  - platform: state
-    entity_id: binary_sensor.be_alert_zone_home_alerting # Change to your location's binary sensor
-    to: "on"
-action:
-  - service: light.turn_on
-    target:
-      entity_id: light.living_room
-    data:
-      flash: long
-  - service: tts.google_translate_say
-    target:
-      entity_id: media_player.google_home_speaker
-    data:
-      message: "Attention, an important BE-Alert message is active for our area."
-```
+The integration monitors the BE Alert feed for alerts in the following categories:
+
+- **Geo**: Geophysical (e.g., earthquake)
+- **Met**: Meteorological (e.g., severe weather)
+- **Safety**, **Security**, **Rescue**, **Fire**, **Health**
+- **Env**: Environmental
+- **Transport**, **Infra**: Infrastructure
+- **CBRNE**: Chemical, Biological, Radiological, Nuclear, and Explosives
+- **Other**

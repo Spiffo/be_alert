@@ -41,3 +41,8 @@ jobs:
 
       - name: Pylint
         run: pylint custom_components/be_alert
+
+      - name: HACS validation
+        uses: "hacs/action@main"
+        with:
+          category: "integration"

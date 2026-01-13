@@ -1,0 +1,7 @@
+{
+  "name": "BE Alert",
+  "homeassistant": "2022.11.0",
+  "content_in_root": false,
+  "render_readme": true,
+  "country": ["BE"]
+}

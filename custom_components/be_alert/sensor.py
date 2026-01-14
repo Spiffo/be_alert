@@ -224,7 +224,7 @@ class BeAlertLocationEntity(CoordinatorEntity[DataUpdateCoordinator]):
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, slug)},
             name=device_name,
-            manufacturer="BE-Alert",
+            manufacturer="BE Alert",
             model=f"Tracked {config.source_entity_id.split('.', 1)[0]}",
             entry_type=DeviceEntryType.SERVICE,
         )
